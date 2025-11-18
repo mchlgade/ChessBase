@@ -51,7 +51,7 @@ function CBdisplaymenu( $print_on = true )
 {
 	global $news, $game, $function, $message, $forum;
 	
-	$currentuser = RMLgetcurrentuser();
+	$currentuser = CBgetcurrentuser();
 
 	$out = "\n\n".'<!-- MENU START --><div class="menu"><a href="."><img class="logo" alt="Logo" src="./img/logo.png" />';
 	// </a><a class="button home" href=".">Home</a>
@@ -173,7 +173,7 @@ function CBdisplaymain( $id, $print_on = true ) {
 		$frontpage = false;
 	break;
 	case 'edit':
-		$out .= RMLeditgame( $id, false );
+		$out .= CMeditgame( $id, false );
 		$frontpage = false;
 	break;
 
@@ -244,7 +244,7 @@ function CBdisplaylocation( $print_on = true ) {
 
 // ============================================================================
 
-function RMLdisplaytitle( $print_on = true ) {
+function CBdisplaytitle( $print_on = true ) {
 	global $function, $message, $game, $player, $id, $step, $format, $comment, $news, $forum;
 
 	//default
@@ -406,14 +406,14 @@ function CBdisplayfrontpage( $print_on = true ) {
 // ============================================================================
 
 function CBgetlatestcomment( $print_on = true ) {
-	$result = RMLfiresql("SELECT author,body,level,thread_id,posted_on FROM forum WHERE level > 0 ORDER BY posted_on DESC LIMIT 1");
+	$result = CBfiresql("SELECT author,body,level,thread_id,posted_on FROM forum WHERE level > 0 ORDER BY posted_on DESC LIMIT 1");
 	$thisrow = pg_Fetch_Object($result,0);
 	$thishandle = $thisrow->author;
 	$thisuserID = CBgetuserID( $thishandle );
 	$thisbody = nl2br($thisrow->body);
 	$thisrating = $thisrow->level;
 	$thisgame = $thisrow->thread_id;
-	$thisdate = RMLfixdate($thisrow->posted_on);
+	$thisdate = CBfixdate($thisrow->posted_on);
 	
 	if( !file_exists( './players/'.$thisuserID.'.png' ) ) {
 		$image = 'Anonymous';
@@ -527,8 +527,8 @@ function CBdisplay( $text , $type, $print_on = true ) {
 function CBdisplaymanual( $print_on = true )
 {
 	setTimeZone();
-	$out = ''
-	.CBdisplay( 'A helpful documentation for all of you that are willing to rise from ordinary Reader to Librarian or are eager to know sligtly more about this place and how it works.', 8, false )
+	$out = '';
+	CBdisplay( 'A helpful documentation for all of you that are willing to rise from ordinary Reader to Librarian or are eager to know sligtly more about this place and how it works.', 8, false );
 	return processOutput( $out, $print_on );
 }
 
@@ -536,14 +536,14 @@ function CBdisplaymanual( $print_on = true )
 
 function CBdisplayusers( $print_on = true )
 {
-	$result = RMLfiresql("SELECT id,user_name,karma,irc,xmpp,diaspora,mastodon,ricochet FROM \"user\" WHERE karma > 1 ORDER BY karma DESC");
+	$result = CBfiresql("SELECT id,user_name,karma,irc,xmpp,diaspora,mastodon,ricochet FROM \"user\" WHERE karma > 1 ORDER BY karma DESC");
 	
 	for( $row=0; $row < pg_numrows( $result ); $row++ ) {
 		$thisrow = pg_Fetch_Object( $result, $row );
 		$thisid = $thisrow->id;	
 		$thisusername = $thisrow->user_name;
 		$thiskarma = $thisrow->karma;
-		$thiskarma = '(' . RMLgetrating($thiskarma) . ')';
+		$thiskarma = '(' . CBgetrating($thiskarma) . ')';
 		$diaspora = $thisrow->diaspora;
 		$mastodon = $thisrow->mastodon;
 		$xmpp = $thisrow->xmpp;
@@ -573,7 +573,7 @@ function CBdisplayusers( $print_on = true )
 function CBdisplayplayers( $print_on = true )
 {
 	$out = '';
-	$sql = RMLfiresql( "SELECT DISTINCT(handle) AS owner, COUNT(handle) AS docs, MIN(posted_on) AS first, MAX(posted_on) AS last FROM game WHERE status=3 GROUP BY owner ORDER BY docs DESC, first DESC" );
+	$sql = CBfiresql( "SELECT DISTINCT(handle) AS owner, COUNT(handle) AS docs, MIN(posted_on) AS first, MAX(posted_on) AS last FROM game WHERE status=3 GROUP BY owner ORDER BY docs DESC, first DESC" );
 	for( $row=0; $row < pg_numrows( $sql ); $row++ ) {
 		$thisrow = pg_Fetch_Object( $sql, $row );
 		$thisuser = $thisrow->owner;

@@ -24,20 +24,23 @@ $itemprpage = 20;
 
 require 'settings.php';
 require 'CB.database.php';
+require 'CB.helper.php';
+require 'CB.common.php';
+require 'CB.user.php';
 
 // set timezone to prevent warning
 setTimezone();
 
-// activate custom error handler; save old for use with `restore_error_handler`
-$old_error_handler = set_error_handler("customErrorHandler");
-
 $id = 0;
 $message = null;
+$function = null;
+$game = null;
+$comment = null;
 $currentposition = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'; // FEN start
 $step = 0;
 $out = '';
 
-$cookie = CBpreparestring($_COOKIE['ChessBase']);
+$cookie = CBpreparestring($_COOKIE['CB']);
 
 if ( isset($_REQUEST) && count($_REQUEST) > 0 ) {
 
