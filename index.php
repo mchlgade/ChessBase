@@ -27,6 +27,7 @@ require 'CB.database.php';
 require 'CB.helper.php';
 require 'CB.common.php';
 require 'CB.user.php';
+require 'CB.forum.php';
 
 // set timezone to prevent warning
 setTimezone();
@@ -35,6 +36,7 @@ $id = 0;
 $message = null;
 $function = null;
 $game = null;
+$player = null;
 $comment = null;
 $currentposition = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'; // FEN start
 $step = 0;

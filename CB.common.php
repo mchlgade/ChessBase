@@ -49,7 +49,7 @@ function CBMenuButton( $btntile, $href = "", $class = "", $decoration = 'star' )
 
 function CBdisplaymenu( $print_on = true )
 {
-	global $news, $game, $function, $message, $forum;
+	global $news, $game, $function, $message, $forum, $player, $out;
 	
 	$currentuser = CBgetcurrentuser();
 
@@ -367,6 +367,7 @@ function CBdisplaytitle( $print_on = true ) {
 // ============================================================================
 
 function CBdisplayfrontpage( $print_on = true ) {
+	global $out;
 
 	$out .= '<img style="float:right;margin-left:20px;margin-bottom:10px" src="./img/about.jpg" />';
 
