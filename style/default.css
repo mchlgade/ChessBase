@@ -1,0 +1,787 @@
+/* =====================================================================
+
+Default stylesheet for ChessBaswe
+
+Copyright (C) Michael Gade
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+===================================================================== */
+
+body {
+	font-family	: serif;
+	font-size		: 14pt;
+	margin			: 0;
+	color			: black;
+	padding			: 0
+}
+
+.main {
+	margin		: 10px;
+	vertical-align	: top
+}
+
+.menu {
+	padding-left	: 5px;
+	padding-top	: 5px
+}
+
+table.main {
+	border-spacing	: 0;
+	border-style	: solid;
+	border-width	: 1px;
+	border-color	: black	
+}
+
+table.main td {
+	border-style	: solid;
+	border-width	: 1px;
+	border-color	: black	
+}
+
+img.logo {
+	margin			: 0px;
+	border			: 0;
+	padding-right	: 5px;
+	float			: right;
+}
+
+img.icon {
+	margin-top		: -25px;
+	margin-right	: -45px
+}
+
+img.topicon {
+	margin-top		: -20px;
+	margin-left		: -35px;
+	margin-right	: -30px
+}
+
+img.docicon {
+	border			: 0;
+	padding-right	: 10px;
+	float			: left
+}
+
+img.Author {
+	float		: left;
+	width		: 150px;
+	margin		: 0px;
+	margin-right	: 10px;
+	margin-bottom	: 5px;
+	margin-left	: 5px;
+	margin-top	: 5px;
+	border		: 0;
+	border-width	: 1px;
+	border-style	: solid;
+	border-color	: black
+}
+
+.statusbox {
+	display		: inline-block;
+	font-size	: 12pt;
+	margin-bottom	: 10px;
+	padding		: 0px
+}
+
+.box {
+	margin-bottom	: 10px;
+	padding		: 0px;
+}
+
+img.authorphoto {
+	margin	: 0 0 20px 20px;
+	float	: right;
+	border	: 1px solid black;
+}
+
+img.Cover {
+	margin		: 0px;
+	margin-right	: 10px;
+	margin-bottom	: 5px;
+	border		: 0;
+	border-width	: 1px;
+	border-style	: solid;
+	border-color	: black;
+	width		: 150px;
+	float		: left
+
+}
+
+img.FrontCover {
+	margin-right	: 1px;
+	margin-bottom	: 3px;
+	max-height		: 150px;
+	border-width	: 1px;
+	border-style	: solid;
+	border-color	: black;
+	vertical-align	: top
+}
+
+img.button {
+	border			: 0;
+	margin-top		: 5px
+}
+
+img.boxbutton {
+	border			: 0;
+	padding			: 0;
+	margin			: 0;
+	margin-left		: 5px
+}
+
+img.bottom {
+	border			: 0;
+	padding-right	: 5px;
+	margin			: 0
+}
+
+.bottom {
+	text-align		: left;
+	padding			: 5px;
+	color			: #AAA
+}
+
+.end {
+	padding-top		: 10px;
+	padding-bottom	: 10px;
+	color			: black;
+	text-align		: center;
+	border-top-width : 2px;
+	border-top-style : dotted;
+	border-top-color : black	
+}
+
+.end b {
+	color			: red
+}
+
+.end a {
+	color			: red;
+	font-weight		: normal
+}
+
+.left {
+	padding			: 5px;
+	padding-top	: 0;
+	text-align		: left;
+	vertical-align	: top
+}
+
+.right {
+	vertical-align	: top;
+	margin			: 0;
+	padding			: 15px 5px;
+	max-width		: 125px
+}
+
+.right-align {/*<div class="right-align"> ... </div>*/
+	text-align		: right;
+	padding-right	: 1ex;
+}
+
+.userhandle {/*<span class="userhandle">${Username}</span>*/
+	font-weight		: bold;
+	font-style		: normal;
+	font-variant	: small-caps;
+}
+
+.createdby {/*<span class="createdby">by</span>*/
+	font-style		: italic;
+	font-weigt		: unset;
+}
+
+.notes {/*<div class="notes"> ... </div>*/
+	font-size		: 0.7em;
+	font-style		: italic;
+}
+
+.userannotation {/*<div class="userannotation"> ... </div>*/
+	font-size		: 0.7em;
+	background-color: antiquewhite;
+}
+
+.center {
+	text-align		: center;
+	margin			: 5px
+}
+
+p.pagetitle {
+	padding			: 0;
+	margin			: 0;
+	padding-bottom	: 10px;
+	font-size		: 24pt;
+	color			: #222;
+	font-weight		: bold;
+	text-shadow		: -2px -2px 2px #777;
+	text-align		: center;
+	border-bottom-width : 2px;
+	border-bottom-style : dotted;
+	border-bottom-color : black
+}
+
+p.location {
+	margin			: 0;
+	margin-top		: 5px;
+	color			: red
+}
+
+p.location a {
+	font-family		: sans-serif;
+	color			: black;
+	font-weight		: bold
+}
+
+p.login {
+	text-align		: right;
+	font-size		: 8pt;
+	margin			: 0;
+	margin-right	: 5px;
+	padding			: 0
+}
+
+p.login a {
+	color			: black;
+	font-weight		: bold;
+	text-decoration	: none
+}
+
+hr.left {
+	padding			: 0;
+	margin			: 5px;
+	border-style	: none
+}
+
+p.Error {
+	font-size		: 12pt;
+	color			: red
+}
+
+p.Head1 {
+	margin			: 0;
+	font-size		: 16pt;
+	font-weight		: bold;
+	margin-top		: 16pt;
+	margin-bottom	: 8pt;
+	line-height		: 16pt
+}
+
+p.Head2 {
+	margin			: 0;
+	font-size		: 16pt;
+	margin-top		: 10pt;
+	margin-bottom	: 6pt;
+	line-height		: 16pt
+}
+
+p.ParaIndent {
+	margin			: 0;
+	line-height		: 16pt;
+	text-indent		: 1em;
+	text-align		: justify
+}
+
+p.ParaBlankOver {
+	margin			: 0;
+	line-height		: 16pt;
+	margin-top		: 1em;
+	text-align		: justify
+}
+
+p.ParaNoIndent {
+	margin			: 0;
+	line-height		: 16pt;
+	text-indent		: 0;
+	text-align		: justify
+}
+
+p.QuoteIndent {
+	font-family		: sans-serif;
+	font-size		: 10pt;
+	margin			: 0;
+	margin-left		: 2em;
+	line-height		: 12pt;
+	text-indent		: 1em;
+	text-align		: justify
+}
+
+p.QuoteNoIndent {
+	font-family		: sans-serif;
+	font-size		: 10pt;
+	margin			: 0;
+	margin-left		: 2em;
+	line-height		: 12pt;
+	text-indent		: 0;
+	text-align		: justify
+}
+
+p.QuoteBlankOver {
+	font-family		: sans-serif;
+	font-size		: 10pt;
+	margin			: 0;
+	margin-left		: 2em;
+	line-height		: 12pt;
+	text-indent		: 0;
+	margin-top		: 1em;
+	text-align		: justify
+}
+
+p.PreBlankOver {
+	font-family		: monospace;
+	font-size		: normal;
+	white-space : pre-wrap; 
+	margin			: 0;
+	line-height		: 12pt;
+	margin-top		: 12pt;
+	text-align		: left
+}
+
+p.PreNoIndent {
+	font-family		: monospace;
+	font-size		: normal;
+	white-space : pre-wrap;
+	margin			: 0;
+	line-height		: 12pt;
+	text-indent		: 0;
+	text-align		: left
+}
+
+p.HangingBlankOver {
+	font-size		: normal;
+	margin			: 0;
+	margin-left		: 1em;
+	line-height		: 16pt;
+	margin-top		: 16pt;
+	text-align		: left;
+	text-indent		: -1em;
+}
+
+p.HangingIndent {
+	font-size		: normal;
+	margin			: 0;
+	margin-left		: 1em;
+	line-height		: 16pt;
+	text-indent		: -1em;
+	text-align		: left
+}
+
+p.ParaVignet {
+	margin			: 0;
+	line-height		: 16pt;
+	margin-top		: 12pt;
+	text-align		: justify
+}
+
+p.ParaVignet:before {
+	display : block;
+	text-align : center;
+	margin-bottom : 0.4em;
+	content			: url(../img/vignet.jpg)	
+}
+
+p.Picture {
+	text-align		: center
+}
+
+p.Picture img {
+	max-width		: 98%;
+	height			: auto
+}
+
+.BoxStart {
+	margin : 1em auto;
+	padding : 0.5em;
+	border-width	: 1px;
+	border-color	: black;
+	border-style	: solid;
+	background-color	: #AAA
+}
+
+p.BoxHead {
+	font-family : sans-serif;
+	font-size : 125%;
+	font-weight : bold;
+	margin : 0;
+	padding : 0;
+	margin-bottom : 10px;
+}
+
+p.boxtext {
+	margin			: 0;
+	padding			: 5px
+}
+
+.right-float {
+	float			: right
+}
+
+.box b {
+	font-weight		: bold;
+	color			: #000
+}
+
+.boxheader {
+	margin			: 0;
+	padding			: 5px 5px 5px 10px;
+	border-bottom-width : 1px;
+	border-bottom-style : solid;
+	border-color : black
+}
+
+.boxheader a {
+	text-decoration	: none;
+	color			: #333
+}
+
+.boxheader a:hover {
+	text-decoration	: underline
+}
+
+.boxtext {
+	padding			: 5px;
+	margin			: 5px;
+	text-align		: justify;
+	color			: #333
+}
+
+.boxheader big {
+	font-weight		: bold
+}
+
+.librarian ul {
+	list-style:	none;
+}
+
+.librarian ul li span {
+	display:	inline-block;
+	width:		7ex;
+}
+
+.inlineitem {
+	padding-bottom	: 15px;
+	margin-bottom	: 15px;
+	border-bottom-style: dotted;
+	border-width	: 1px
+}
+
+.top {
+	margin-top		: -30px
+}
+
+.bottom {
+	margin			: 0;
+	padding			: 0;
+	text-align		: center
+}
+
+div.order {
+	font-family	: sans-serif;
+	margin			: 0;
+	margin-bottom	: 15px;
+	margin-top		: 10px;
+	margin-left	: 10px;
+	text-align		: left;
+}
+
+.order a {
+	color			: black
+}
+
+hr.forumseperator {
+	text-align		: center;
+	width			: 90%;
+	padding			: 0;
+	margin-top		: 5px;
+	margin-bottom	: 5px;
+	border-style	: dotted;
+	border-color	: #AAA;
+	border-bottom-color: white;
+	border-left-color	: white;
+	border-right-color: white
+}
+
+.forumsticky {
+	background-color 	: #AAA;
+	font-weight		: bold;
+	padding				: 3px
+}
+
+.forumsticky a {
+	color : black
+}
+
+.forummisc {
+	background-color	: #DDD;
+	padding				: 3px
+}
+
+.forummisc a {
+	color : black
+}
+
+label {
+	display			: block;
+	font-size		: normal;
+	color			: white;
+	width			: 45px;
+	float			: left;
+	margin			: 2px 4px 6px 4px;
+	text-align		: right
+}
+
+br.form {
+	clear			: left
+}
+
+.clear {
+	overflow		: hidden;
+	font-size		: 6px;
+	padding-top		: 4px;
+	width			: 100%
+}
+
+.inlineclear {
+	overflow		: hidden;
+	width			: 100%
+}
+
+fieldset {
+	margin 			: 0;
+	font-family		: sans-serif;
+	padding 		: 6px;
+	border-width	: 0px
+}
+
+label {
+	font-family		: sans-serif;
+	color 			: black;
+	font-weight 	: normal
+}
+
+legend {
+	font-family		: sans-serif;
+	font-weight		: normal;
+	color			: black;
+	background		: #fff;
+	border			: 1px solid black;
+	padding			: 2px 15px
+}
+
+.formbutton {
+	color			: #222;
+	font-family		: sans-serif;
+	padding			: 1px;
+	font-weight		: bold;
+	margin-top		: 4px;
+	margin-right	: 1px
+}
+
+input.norm {
+	width			: 500px;
+	font-size		: 12pt;
+	font-family		: sans-serif
+}
+
+input[type="checkbox"].flipcheck {
+	position	: absolute;
+	left		: -9999em;
+}
+
+.flipcheck + .flipcontent {
+	display		: hidden;
+}
+
+.flipcheck:checked + .flipcontent {
+	display		: inherit;
+}
+
+textarea.norm {
+	width			: 500px;
+	font-size		: 12pt;
+	font-family		: sans-serif
+}
+
+select.norm {
+	width			: 300px;
+	font-size		: 12pt;
+	font-family		: sans-serif
+}
+
+.input {
+	border			: 1px solid;
+	font-size		: 12pt;
+	background		: #fff
+}
+
+.input:hover {
+	border			: 1px solid #f00
+}
+
+.Subtitle {
+	font-family		: sans-serif;
+	font-size		: 12pt;
+	margin			: 0;
+	margin-top		: -5px;
+	margin-bottom	: 15px;
+	display			: block;
+	text-align		: center
+}
+
+sup
+{
+	font-size: small
+}
+
+sub
+{
+	font-size: small
+}
+
+.button {
+	display: inline-block;
+	white-space: nowrap;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#eee), to(#bbb));
+	background-image: -webkit-linear-gradient(top, #eee, #bbb);
+	background-image: -moz-linear-gradient(top, #eee, #bbb);
+	background-image: -ms-linear-gradient(top, #eee, #bbb);
+	background-image: -o-linear-gradient(top, #eee, #bbb);
+	background-image: linear-gradient(top, #eee, #bbb);
+	border: 1px solid #777;
+	padding: 0;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	margin-bottom: 0.2em;
+	margin-top: 0.1em;
+	font: bold 0.8em/1.8em sans-serif;
+	text-decoration: none;
+	color: #333;
+	text-shadow: 0 1px 0 rgba(255,255,255,.8);
+	border-radius: .5em;
+	box-shadow: 0 0 1px 1px rgba(255,255,255,.8) inset, 0 1px 0 rgba(0,0,0,.3);
+}
+
+.activebutton {
+	display: inline-block;
+	white-space: nowrap;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#cfc), to(#44dd44));
+	background-image: -webkit-linear-gradient(top, #cfc, #44dd44);
+	background-image: -moz-linear-gradient(top, #cfc, #44dd44);
+	background-image: -ms-linear-gradient(top, #cfc, #44dd44);
+	background-image: -o-linear-gradient(top, #cfc, #44dd44);
+	background-image: linear-gradient(top, #cfc, #44dd44);
+	border: 1px solid #777;
+	padding: 0;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	margin-bottom: 0.2em;
+	margin-top: 0.1em;
+	font: bold 0.8em/1.8em sans-serif;
+	text-decoration: none;
+	color: #333;
+	text-shadow: 0 1px 0 rgba(255,255,255,.8);
+	border-radius: .5em;
+	box-shadow: 0 0 1px 1px rgba(255,255,255,.8) inset, 0 1px 0 rgba(0,0,0,.3);
+}
+
+.button:hover {
+	background-color: #eee;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#fafafa), to(#ddd));
+	background-image: -webkit-linear-gradient(top, #fafafa, #ddd);
+	background-image: -moz-linear-gradient(top, #fafafa, #ddd);
+	background-image: -ms-linear-gradient(top, #fafafa, #ddd);
+	background-image: -o-linear-gradient(top, #fafafa, #ddd);
+	background-image: linear-gradient(top, #fafafa, #ddd);
+}
+
+.activebutton:hover {
+	background-color: #eee;
+	background-image: -webkit-gradient(linear, left top, left bottom, from(#fafafa), to(#fe9898));
+	background-image: -webkit-linear-gradient(top, #fafffa, #a8fea8);
+	background-image: -moz-linear-gradient(top, #fafffa, #77fe77);
+	background-image: -ms-linear-gradient(top, #fafafa, #fea8a8);
+	background-image: -o-linear-gradient(top, #fafafa, #fea8a8);
+	background-image: linear-gradient(top, #fafafa, #fea8a8);
+}
+
+.button:active {
+	box-shadow: 0 0 4px 2px rgba(0,0,0,.3) inset;
+	position: relative;
+	top: 1px;
+}
+
+.button:focus {
+	outline: 0;
+	background: #fafafa;
+}
+
+.button:before,.activebutton:before {
+	background: #ccc;
+	background: rgba(0,0,0,.1);
+	float: left;
+	width: 0.8em;
+	text-align: center;
+	font-size: 1.25em;
+	margin: 0 0.5em 0 -0.4em;
+	padding: 0 .3em;
+	box-shadow: 1px 0 0 rgba(0,0,0,.5), 2px 0 0 rgba(255,255,255,.5);
+	border-radius: .5em 0 0 .2em;
+	pointer-events: none;
+}
+
+/* Entities for the icons */
+
+.add:before {
+	content: "\271A";
+}
+
+.edit:before {
+	content: "\270E";
+}
+
+.delete:before {
+	content: "\2718";
+}
+
+.save:before {
+	content: "\2714";
+}
+
+.email:before {
+	content: "\2709";
+}
+
+.like:before {
+	content: "\2764";/* new like for more diversity */
+}
+
+.next:before {
+	content: "\21E8";
+}
+
+.prev:before {
+	content: "\21E6";
+}
+
+.up:before {
+	content: "\21E7";
+}
+
+.star:before {
+	content: "\272A";
+}
+
+.spark:before {
+	content: "\2737";
+}
+
+.home:before {
+	content: "\2302";
+}
+
+.about:before {
+	content : "\003F"; 
+}
+
