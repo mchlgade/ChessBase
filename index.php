@@ -42,7 +42,9 @@ $currentposition = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'; /
 $step = 0;
 $out = '';
 
-$cookie = CBpreparestring($_COOKIE['CB']);
+if ( isset($_COOKIE['CB']) ) {
+	$cookie = CBpreparestring($_COOKIE['CB']);
+}
 
 if ( isset($_REQUEST) && count($_REQUEST) > 0 ) {
 
@@ -99,7 +101,7 @@ switch( $function ) {
 	break;
 	case 'favourite':
 		CBaddtofavourite($id);
-		header( 'Location: ?document=view&id='.$id );
+		header( 'Location: ?game=view&id='.$id );
 	break;
 }
 
