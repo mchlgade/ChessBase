@@ -15,7 +15,6 @@
 //  GNU General Public License for more details.
 // ============================================================================
 
-/* users ID should be used for identifying connected resources */
 function CBgetuserID( $username )
 {
 	$username = CBgetcurrentuser();
@@ -29,6 +28,8 @@ function CBgetuserID( $username )
 	}
 }
 
+// ============================================================================
+
 function CBgetuserhandle ( $userid )
 {
 	$result = CBfiresql( "SELECT user_name FROM \"user\" WHERE id=$userid" );
@@ -37,29 +38,23 @@ function CBgetuserhandle ( $userid )
 	return $thisrow->user_name;
 }
 
-// todo:
-// return ID of a user named, use pq_prepare (http://php.net/manual/en/function.pg-prepare.php)
-// sanetize RMLfiresql to use prepared statements, for now just aside each other
-/*/ 
-function RMLgetuserID( $handle = '' )
-{
-	//needs $conn for db connection handle, so better do that in a db function
-	if ( $handle == '' ) {
-		return false;
-	} else {
-		$u_query = 'SELECT id FROM "user" where handle = $1;'
-		$p_query_args = array( $handle );
-		$p_query = pq_prepare( $conn, $u_query );
-		$result = pg_execute( $conn, $p_query, $p_query_args );
-	}
-}
-/* todo: swap with RMLgetcurrentuser when all usage is moved to id only */
+// ============================================================================
+
 function CBgetcurrentuserID()
 {
 	return CBgetuserID( CBgetcurrentuser() );
 }
-/* handle should not be used for any comparison, part of filenames without proper validation */
-// todo: make use of id for cookie as well
+
+// ============================================================================
+
+function getPwdHash( $password )
+{	
+	global $secret_salt;
+	return sha1($secret_salt . $password . $secret_salt);
+}
+
+// ============================================================================
+
 function CBgetcurrentuser()
 {
 	global $cookie;
@@ -96,11 +91,11 @@ function CBgivekarma($userid) {
 
 function CBlogin()
 {
-	global $login, $logon;
+	global $pass1, $pass2;
 
-	$username = CBgetusername($login, $logon);
+	$username = CBgetusername($pass1, $pass2);
 	    
-    if ( CBvalidateuser( $login, $logon ) ) {
+    if ( CBvalidateuser( $pass1, $pass2 ) ) {
 		setcookie ("CB", $username . ',' . getPwdHash( $username ) );
 	} else {
 		die ("Login failed...");
@@ -118,11 +113,13 @@ function CBlogout()
 
 // ============================================================================
 
-function CBvalidateuser($login,$logon)
+function CBvalidateuser($pass1,$pass2)
 {
-	$username = CBgetusername($login, $logon);
+	$username = CBgetusername($pass1, $pass2);
 
 	$result = CBfiresql("SELECT id FROM \"user\" WHERE handle='$username'");
+	
+//	die("Validate User ..: ". $username . " : " . $pass1 . " : " . $pass2);
 	
 	if(pg_num_rows($result) == 1) {
 		return true;
@@ -133,40 +130,37 @@ function CBvalidateuser($login,$logon)
 
 // ============================================================================
 
-function CBdisplaysignup( $print_on = true ) {
-	$out = "\n".'<div class="box"><table><form method="post" action="?function=login"><input type="hidden" name="id" value="' .$_GET['id'] .'"><fieldset>
-<tr><td>Login </td><td>: <input type="password" size="40" name="login" /></td></tr>
-<tr><td>Logon </td><td>: <input type="password" size="40" name="logon" /></td></tr>
+function CBdisplaysignup( ) {
+	global $id;
+	$out = "\n".'<div class="box"><table><form method="post" action="?function=login"><input type="hidden" name="id" value="' .$id .'"><fieldset>
+<tr><td>Login </td><td>: <input type="password" size="40" name="pass1" /></td></tr>
+<tr><td>Logon </td><td>: <input type="password" size="40" name="pass2" /></td></tr>
 <tr><td></td><td><input class="formbutton" type="submit" value="Turn On" /></td></tr>
 </fieldset></form></table></div></div>'
 
 .'<div class="box"><div class="boxheader"><b>Sign Up</b></div>
 <div class="boxtext">'."We take great pride in not knowing who our users are, so please don't use any identifying information to log on. This is NOT your 'username' and 'password', it's just two words used to identify you. (Hint: Use a password manager).<br><br><b>NOBODY WILL EVER CONTACT YOU ABOUT THIS FOR ANY REASON.</b><br><br><big><b>It is impossible to restore lost accounts.</b></big>".'
-<table><form method="post" action="?function=newuser"><input type="hidden" name="id" value="' .$_GET['id'] .'"><fieldset>
-<tr><td>Login </td><td>: <input type="password" size="40" name="login"/></td></tr>
-<tr><td>Logon </td><td>: <input type="password" size="40" name="logon"/></td></tr>
+<table><form method="post" action="?function=newuser"><input type="hidden" name="id" value="' .$id .'"><fieldset>
+<tr><td>Name </td><td>: <input type="text" size="40" name="user_name"/></td></tr>
+<tr><td>Login </td><td>: <input type="password" size="40" name="pass1"/></td></tr>
+<tr><td>Logon </td><td>: <input type="password" size="40" name="pass2"/></td></tr>
 <tr><td></td><td><input class="formbutton" type="submit" value="Sign Up"/></td></tr>
 </fieldset></form></table></div></div>';
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
 
 function CBcreatenewuser()
 {
-	global $login, $logon;
+	global $pass1, $pass2, $user_name;
 
-	if (CRYPT_BLOWFISH <> 1) {
-		die( 'RMLcreatenewuser() : Blowfish not available ... FATAL' );
-	}
-	$username = CBgetusername($login, $logon);
+	$username = CBgetusername($pass1, $pass2);
 	
-	CBdisplay("USER : $username",5);
-  
 	$result = CBfiresql("SELECT id FROM \"user\" WHERE handle='$username'");
 
 	if(pg_num_rows($result) == 0) {
-		CBfiresql("INSERT INTO \"user\" (id,handle,user_name,karma) VALUES(DEFAULT,'$username',DEFAULT,DEFAULT)");
+		CBfiresql("INSERT INTO \"user\" (id,handle,user_name,karma) VALUES(DEFAULT,'$username','$user_name',DEFAULT)");
 	} else {
 		die("Signup failed...");
 	}
@@ -178,20 +172,18 @@ function CBcreatenewuser()
 
 function CBgetusername($string1, $string2) {
 	global $secret_salt;
-
-	$result = crypt($string1, $string2);
 	
-	$options = ['salt' => $secret_salt];
-	$result = password_hash($result, PASSWORD_BCRYPT, $options);
-  
+	$result = crypt($string1, $string2);
+	$result = getPwdHash($secret_salt . $result . $secret_salt);
+	
 	$result = substr($result,29);
 	return $result;
 }
 
 // ============================================================================
 
-function CBdisplayuserpage( $print_on = true ) {
-	$result = CBfiresql("SELECT id,user_name,karma,xmpp,diaspora,mastodon,irc,ricochet FROM \"user\" WHERE handle='". CBgetcurrentuser() ."'");
+function CBdisplayuserpage( ) {
+	$result = CBfiresql("SELECT id,user_name,karma FROM \"user\" WHERE handle='". CBgetcurrentuser() ."'");
 
 	if(!$result) { return; }
 	if(pg_numrows($result) == 0) { return; }
@@ -200,89 +192,23 @@ function CBdisplayuserpage( $print_on = true ) {
 	$thisid = $thisrow->id;
 	$username = $thisrow->user_name;
 	$karma = $thisrow->karma;
-	$xmpp = $thisrow->xmpp;
-	$diaspora = $thisrow->diaspora;
-	$mastodon = $thisrow->mastodon;
-	$irc = $thisrow->irc;
-	$ricochet = $thisrow->ricochet;
+	$out = null;
 	
-	if(file_exists("./users/".$thisid.".png")) {	
-		$out = "<div class=\"order\"><img style=\"float:left\" src=\"./users/".$thisid.".png\">";
-	} else {
-		$out = "<div class=\"order\"><img style=\"float:left\" src=\"./users/Anonymous.png\">";
-	}
+//	if(file_exists("./users/".$thisid.".png")) {	
+//		$out = "<div class=\"order\"><img style=\"float:left\" src=\"./users/".$thisid.".png\">";
+//	} else {
+//		$out = "<div class=\"order\"><img style=\"float:left\" src=\"./users/Anonymous.png\">";
+//	}
 	
-	if($xmpp) $out .= "<b>XMPP</b>&nbsp;:&nbsp;$xmpp ";
-	if($irc) $out .= "<br/><b>IRC</b>&nbsp;:&nbsp;$irc ";
-	if($diaspora) $out .= "<br/><b>Diaspora*</b>&nbsp;:&nbsp;$diaspora ";
-	if($mastodon) $out .= "<br/><b>Mastodon</b>&nbsp;:&nbsp;$mastodon ";
-	if($ricochet) $out .= "<br/><b>Ricochet</b>&nbsp;:&nbsp;$ricochet ";
 	$out .= "</small></div><div class=\"inlineclear\"> </div>"
-	.CBdisplaygames( false )
-	.CBdisplaymessages( false )
-	.CBdisplaychpwd( false );
-	return processOutput( $out, $print_on );
+	.CBdisplaygames( )
+	.CBdisplaymessages( );
+	return $out;
 }
 
 // ============================================================================
 
-function CBdisplaychpwd( $print_on = true )
-{
-	$user = CBgetcurrentuser();
-	if ( !isset( $user ) || $user === '' ) {
-		return false;
-	}
-
-	define( CHANGE_PASSWORD_SUBMIT, 'Change Password' );
-	$err = '';
-	$out = '';
-
-	//process data if form was sent
-	if ( $_POST['submit'] === CHANGE_PASSWORD_SUBMIT ) {
-
-		//validate input
-		$pwd0 = ( isset( $_POST['password0'] ) ) ? $_POST['password0'] : '';
-		$pwd1 = ( isset( $_POST['password1'] ) ) ? $_POST['password1'] : '';
-		$pwd2 = ( isset( $_POST['password2'] ) ) ? $_POST['password2'] : '';
-
-		//check authentication on known errors
-		if ( $pwd0 === '' || !CBvalidateuser( $user, $pwd0 ) ) {
-			$err .= 'Error in old password.<br>';
-		} elseif ( $pwd1 === '' ||  $pwd2 === '' ||  $pwd2 !== $pwd1 ) {
-			$err .= 'Error in new password<br>';
-		} 
-		//set new pass as long as no errors occured
-		if ( $err === '' ) {
-			$result = CBfiresql( "UPDATE \"user\" SET pass='" .getPwdHash( $pwd1 ) ."' WHERE handle='".$user."'" );
-			if ( !$result ) {
-				$err .= 'Error on password change.<br>';
-			} else {
-				$out .= 'Password successfully changed.<br>';
-			}
-		}
-
-	} else {
-
-		//or deploy form for data
-		$out .= "\n" .'<form method="post" name="chpwd" id="chpwd" action="?function=user">
-<table class="form">
-<tr><td valign="top">Old Password:</td>
-<td><input class="norm password" type="password" name="password0" id="password0" value=""></td></tr>
-<tr><td valign="top">New Password:</td>
-<td><input class="norm password" type="password" name="password1" id="password1" value=""></td></tr>
-<tr><td valign="top">New Password again:</td>
-<td><input class="norm password" type="password" name="password2" id="password2" value=""></td></tr>
-<tr><td></td><td><input id="submit" name="submit" type="submit" value="' .CHANGE_PASSWORD_SUBMIT .'"></td></tr>
-</table>
-</form>';
-
-	}
-	return processOutput( $out, $print_on );
-}
-
-// ============================================================================
-
-function CBdisplayfavourites( $user_id = 0, $print_on = true )
+function CBdisplayfavourites( $user_id = 0 )
 {
 	if($user_id == 0) { return; }
 	
@@ -297,12 +223,12 @@ function CBdisplayfavourites( $user_id = 0, $print_on = true )
 		$out .= '<a href="?document=view&amp;id='.$id.'"><img class="FrontCover" src="./covers/cover'.$id.'"/></a>';
 	}
 	$out .= '</div></div>';
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
 
-function CBdisplaymessages( $print_on = true ) {
+function CBdisplaymessages( ) {
 	$user = CBgetcurrentuser();
 	if(!$user) { return; }
 	$result = CBfiresql("SELECT id,posted_on,subject,sender_handle FROM message WHERE handle='$user' ORDER BY posted_on DESC");
@@ -332,19 +258,19 @@ function CBdisplaymessages( $print_on = true ) {
 		$out .= "\n<br/>";
 	}
 	$out .= "\n</div><p class=\"boxtext\"><a class=\"button add\" href=\"?message=new\">New Message</a></p></div>";
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
 
-function CBdisplaygames( $print_on = true ) {
+function CBdisplaygames( ) {
 	$user = CBgetcurrentuser();
 
 	$out = '';
 	if( $user ) {	
-		$result = CBfiresql( "SELECT id,status,posted_on,title,player_id,year FROM game WHERE handle='$user' AND status<3 ORDER BY title" );
+		$result = CBfiresql( "SELECT id,status,posted_on,whiteid,blackid,welo,belo,tourid FROM game WHERE posted_by_id='$user' AND status<3 ORDER BY posted_on" );
 
-	$out .= "\n<div class=\"box\"><div class=\"boxheader\"><b>Documents</b></div><div class=\"boxtext\">";
+	$out .= "\n<div class=\"box\"><div class=\"boxheader\"><b>Games</b></div><div class=\"boxtext\">";
 
 		$numrows = pg_numrows( $result ) - 1;
 		for( $row=0; $row < pg_numrows( $result ); $row++ ) {
@@ -352,31 +278,38 @@ function CBdisplaygames( $print_on = true ) {
 			$id = $thisrow->id;
 			$status = $thisrow->status;
 			$posted = $thisrow->posted_on;
-			$posted = RMLfixdate( $posted );
-			$title = $thisrow->title;
-			$year = $thisrow->year;
-			$playerid = $thisrow->author_id;
-			$playername = CBgetplayername( $playerid );
+			$posted = CBfixdate( $posted );
+			$whiteid = $thisrow->whiteid;
+			$blackid = $thisrow->blackid;
+			$whiteelo = $thisrow->welo;
+			$blackelo = $thisrow->belo;
+			$tournamentid = $thisrow->tourid;
+			
+			$whiteplayer = CBgetplayername( $whiteid );
+			$blackplayer = CBgetplayername( $blackid );
+			$tournament = CBgettournament( $tournamentid );
+			
+			$title = $whiteplayer . '(' . $whiteelo . ') vs.' . $blackplayer . '(' . $blackelo . ')';
 
-			$out .= "\n<div class=\"box\"><div class=\"boxheader\"><a href=\"?document=view&amp;id=$id\"><img class=\"Cover\" style=\"width:100px\" src=\"./covers/cover$id\" alt=\"Document cover\"/><b>$title</b></a></div>"
-			."\n<div class=\"boxtext\"><small>by <a href=\"?author=view&amp;id=$authorid\">$authorname</a>, <b>$year</b> Created: <b>$posted</b> in <b><a href=\"?subject=view&amp;id=$subjectid\">$subjecttitle</a></b></small><br/></div><div class=\"clear\"></div></div>";
+			$out .= "\n<div class=\"box\"><div class=\"boxheader\"><a href=\"?game=view&amp;id=$id\"><b>$title</b></a></div>"
+			."\n<div class=\"boxtext\"><small>Created: <b>$posted</b> in <b><a href=\"?tournament=view&amp;id=$tournamentid\">$tournament</a></b></small><br/></div><div class=\"clear\"></div></div>";
 		}
-		$out .= "\n</div><p class=\"boxtext\"><a class=\"button add\" href=\"?game=new\">New Game/a></p></div>";
+		$out .= "\n</div><p class=\"boxtext\"><a class=\"button add\" href=\"?game=new\">New Game</a></p></div>";
 	} else {
 		CBlogout();//ensure cookie is unset
 	}
 
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
 
-function CBdisplayavatar( $print_on = true )
+function CBdisplayavatar( )
 {
-	$id = CBgetcurrentuserID();//No more username plz
+	$id = CBgetcurrentuserID();
 
 	$image = './users/';
-	if( !file_exists( './users/' .$id .'.png' ) ) {//system call => do not use input from users side here
+	if( !file_exists( './users/' .$id .'.png' ) ) {
 		$image .= 'Anonymous';
 	} else {
 		$image .= $id;
@@ -387,20 +320,20 @@ function CBdisplayavatar( $print_on = true )
 <div class="boxtext"><form enctype="multipart/form-data" method="post" action="?document=avatar">&nbsp;&nbsp;<input type="file" size="25" name="picture"><br/>&nbsp;&nbsp;<input type="submit" value="Change Avatar"><input type="hidden" name="document" value="avatar"></form></div>
 <div class="clear"></div>';
 
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
 
 function CBuploadavatar() {
-	$id = CBgetcurrentuserID();//do not use input from user when making system calls!
+	$id = CBgetcurrentuserID();
 	$target_path = './users/' . $id . '.png';
 	move_uploaded_file( $_FILES['picture']['tmp_name'], $target_path );
 }
 
 // ============================================================================
 
-function CBdisplaymessage( $id, $print_on = true ) {
+function CBdisplaymessage( $id ) {
 	$result = CBfiresql( "SELECT handle,body,posted_on,sender_handle FROM message WHERE id=$id" );
 	$thisrow = pg_Fetch_Object( $result, 0 );
 	$handle = $thisrow->handle;
@@ -420,7 +353,7 @@ From : <b>' .$sender.'</b><br/>Sent : <b>' .$posted.'</b>
 	} else {
 		$out = "ERROR: Display Message : Cookiii baaaaaadddd...";
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -439,7 +372,7 @@ function CBdeletemessage( $id ) {
 
 // ============================================================================
 
-function CBreplymessage( $id, $print_on = true ) {
+function CBreplymessage( $id ) {
 	$user = CBgetcurrentuser();
 	if( ( $user ) && ( $id ) ) {
 		$result = CBfiresql( "SELECT handle,sender_handle,body,subject FROM message WHERE id=$id" );
@@ -476,12 +409,12 @@ function CBreplymessage( $id, $print_on = true ) {
 </td></tr><tr><td></td><td><input type=\"submit\" value=\"Send Reply\"></td></tr></table></form>";
 		}
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
 
-function CBdisplaynewmessage( $print_on = true ) {
+function CBdisplaynewmessage( ) {
 	$user = CBgetcurrentuser();
 	$out = '';
 	if( hasRights( 'isuser' ) ) {
@@ -512,18 +445,18 @@ function CBdisplaynewmessage( $print_on = true ) {
 	} else {
 		$out = 'ERROR: You need to log in to send messages.';
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
 
-function CBsendmessage( $to, $msg, $from = 'SYSTEM', $subj = 'Message', $print_on = true ) {
+function CBsendmessage( $to, $msg, $from = 'SYSTEM', $subj = 'Message' ) {
 	$out = '';
 	$r = CBfiresql("INSERT INTO message (id,posted_on,handle,subject,body,sender_handle) VALUES (DEFAULT,NOW(),'$to','$subj','$msg','$from')");
 	if( ! $r ) {
 		$out = 'ERROR: Message not sent: FROM: '.$from.';TO:'.$to.'; SUBJ:'. $subj.'; MSG:'. $msg;
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 function hasRights( $action = '', $arr = array() )
@@ -566,3 +499,4 @@ function hasRights( $action = '', $arr = array() )
 	}
 	return false;
 }
+

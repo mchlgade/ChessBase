@@ -85,7 +85,7 @@ function CBgetgametitle( $id, $print_on = false )
 	} else {
 		$out = $thisrow->white . ' vs. ' . $thisrow->black;
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -131,28 +131,6 @@ function CBcreateplayer( $player )
 
 // ============================================================================
 
-function CBpreparestring( $string )
-{
-	$result = str_replace( '\'', '\'\'', $string );
-	
-	$result = preg_replace_callback( '@&#(\d+);@', function($m){ // using callback variant after e modifier was deprecated
-		// we expect integer
-		if ( $m[1] >= 0 && $m[1] < 32 ) {
-			return chr($m[1]); // supports ascii only
-		} else if ( $m[1] >= 32 ) {
-			// this one would also support hex, orctal etc. numbers
-			return html_entity_decode($m[0], ENT_QUOTES | ENT_XML1, 'UTF-8');
-		} else { // < 0 
-			trigger_error("unexpected match in function CBpreparestring: ".$m[0], E_USER_WARNING);
-		}
-	}, $result );
-
-	$result = strip_tags( $result, "<b><i><emph><a><br><img><sup><sub><ol><ul><li>" );
-	return $result;
-}
-
-// ============================================================================
-
 function CBdisplaynews( $print_on = true )
 {
 	$out = '';
@@ -180,7 +158,7 @@ function CBdisplaynews( $print_on = true )
 		"\n".'<a class="button add" href="?news=add">Add News</a>'
 		;
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -201,7 +179,7 @@ Please keep news to something that is actually news. Other than that, go nuts...
 <tr><td></td><td><input type="submit" value="Post news"></td></tr></table>
 <input type="hidden" name="news" value="save"></form>';
 	}
-	return processOutput( $out, $print_on );
+	return out;
 }
 
 // ============================================================================
@@ -219,7 +197,7 @@ function CBsavenews( $print_on = true )
 
 		CBfiresql("INSERT INTO news (id,headline,body,author,posted) VALUES(DEFAULT,'$headline','$body','$author',NOW())");
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -235,7 +213,7 @@ function CBdeletenews( $id, $print_on = true )
 	} else {
 		CBfiresql("DELETE FROM news WHERE id=$id");
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -264,7 +242,7 @@ Please keep news to something that is actually news. Other than that, go nuts...
 			;
 		}
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -279,7 +257,7 @@ function CBupdatenews( $print_on = true )
 		$out = 'ERROR: No code in function yet.';
 	}
 	CBfiresql("UPDATE news SET headline='".$headline."', body='".$body."' WHERE id='$id'");
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -334,7 +312,7 @@ function CBgeneraterss($print_on = true)
 	
 	$out .= '</channel>';
 	$out .= '</rss>';
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -470,68 +448,4 @@ function setTimeZone( $z = 'Europe/Copenhagen' )
 	return date_default_timezone_set( $z );
 }
 
-/* ewa:		centralize output, check for marked error and return value
- * usage:	return processOutput( $out, $print_on );
- * */
-function processOutput( $output, $printit )
-{
-	if ( $printit ) {
-		print( $output );
-		if ( strtoupper( substr( $output, 0, 6 ) ) == 'ERROR:' ) {
-			return false;
-		} else {
-			return true;
-		}
-	} else {
-		return $output;
-	}
-}
 
-/* custom error handler */
-// influence what information is shown
-function showErrorMessage($errtype, $errno, $errstr, $errline, $errfile) {
-        echo "<b>".$errtype."</b> [ErrNo. ".$errno."] ".$errstr."<br />\n";
-        echo "  on <em>line ".$errline."</em> in file <code>".basename($errfile, ".php")."</code><br />\n";
-        //echo "  PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
-}
-// error handler to be applied with `set_error_handler()`
-
-function customErrorHandler($errno, $errstr, $errfile, $errline)
-{
-    if (!(error_reporting() & $errno)) {
-        // This error code is not included in error_reporting, so let it fall
-        // through to the standard PHP error handler
-        return false;
-    }
-
-    $abort = false;
-    $errtype = 'UNKNOWN CONFLICT';
-    switch ($errno) {
-    case E_ERROR:
-    case E_USER_ERROR: // user triggered
-        $errtype = 'ERROR';
-        echo "Aborting with …<br />\n";
-        $abort = true;
-        break;
-    case E_WARNING:
-    case E_USER_WARNING: // user triggered
-        $errtype='WARNING';
-        break;
-    case E_NOTICE:
-    case E_USER_NOTICE: // user triggered
-        $errtype='NOTICE';
-        break;
-    E_PARSE:
-        $errtype='PARSE ERROR';
-        break;
-    default:
-        echo("Have a Look at http://php.net/manual/de/errorfunc.constants.php for ErrNo.<br />\n");
-        break;
-    }
-        showErrorMessage($errtype, $errno, $errstr, $errline, $errfile);
-        if($abort === true) {
-          exit(1);
-        }
-    /* Don't execute PHP internal error handler */
-    return true;
-}

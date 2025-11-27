@@ -15,58 +15,42 @@
 // ============================================================================
 
 error_reporting(E_ALL ^E_NOTICE ^E_DEPRECATED);
-// error_reporting(E_ALL ^E_STRICT);
+//error_reporting(E_ALL ^E_STRICT);
 ini_set('display_errors', '1');
 
-$starttime = microtime();
-$Version = "0.1";
-$itemprpage = 20;
+$pagename = "Valby Skakklub";
+$Version = "";
 
 require 'settings.php';
+require 'CB.common.php';
 require 'CB.database.php';
 require 'CB.helper.php';
-require 'CB.common.php';
 require 'CB.user.php';
 require 'CB.forum.php';
-
-// set timezone to prevent warning
-setTimezone();
+require 'CB.chess.php';
 
 $id = 0;
-$message = null;
 $function = null;
-$game = null;
 $player = null;
-$comment = null;
+$pass1 = null;
+
 $currentposition = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'; // FEN start
 $step = 0;
-$out = '';
 
-if ( isset($_COOKIE['CB']) ) {
-	$cookie = CBpreparestring($_COOKIE['CB']);
-}
+$boardsize = 450;
+$reversed = 0;
+$dark = '#769656';
+$lite = '#eeeed2';
 
-if ( isset($_REQUEST) && count($_REQUEST) > 0 ) {
-
-	$id = ( is_numeric($_REQUEST['id']) && $_REQUEST['id'] > 0 ) ? $_REQUEST['id'] : 0 ;
-	if(is_numeric($_REQUEST['step'])) { $step = $_REQUEST['step']; }
-	
-	$game = CBpreparestring($_REQUEST['game']);
- 	$function = CBpreparestring($_REQUEST['function']);
-	$message = CBpreparestring($_REQUEST['message']);
-	$blog = CBpreparestring($_REQUEST['blog']);
-	$body = CBpreparestring($_REQUEST['body']);
-	$login = CBpreparestring($_REQUEST['login']);
-	$logon = CBpreparestring($_REQUEST['logon']);
-	$comment = CBpreparestring($_REQUEST['comment']);
-	$messageto = CBpreparestring($_REQUEST['messageto']);
-	$messagesubject = CBpreparestring($_REQUEST['messagesubject']);
-	$forum = CBpreparestring($_REQUEST['forum']);
-}
+if (isset($_COOKIE['CB'])) $cookie = $_COOKIE['CB'];
+if (isset($_REQUEST['function'])) $function = $_REQUEST['function'];
+if (isset($_REQUEST['pass1'])) $pass1 = $_REQUEST['pass1'];
+if (isset($_REQUEST['pass2'])) $pass2 = $_REQUEST['pass2'];
+if (isset($_REQUEST['user_name'])) $user_name = $_REQUEST['user_name'];
 
 switch( $function ) {
 	case 'login':
-		if($login <> '') {
+		if($pass1 <> '') {
 			CBlogin();
 			break;
 		}
@@ -79,73 +63,13 @@ switch( $function ) {
 	case 'newuser':
 		CBcreatenewuser();
 	break;
-	case 'flush':
-		CBflushgame( $id );
-		header("Location: ?game=view&id=$id");
-	break;
-	case 'delete':
-		CBdeletegame( $id );
-		$user = CBgetcurrentuser();
-		header( 'Location: ?function=user&user='.$user );
-	break;
-	case 'download':
-		if ( !in_array( $format, array( 'pgn','html' ) ) ) {
-			$format = 'pgn';
-		}
-		CBdownloadgame( $id, $format );
-		header( 'Location: ?game=view&id='.$id );
-	break;
-	case 'rss':
-		CBgeneraterss(true);
-		die();
-	break;
-	case 'favourite':
-		CBaddtofavourite($id);
-		header( 'Location: ?game=view&id='.$id );
-	break;
 }
 
-switch( $message ) {
-	case 'delete':
-		CBdeletemessage( $id );
-	break;
-	case 'send':
-		$out .= CBsendmessage( $messageto, $body, CBgetcurrentuser(), $messagesubject, false );
-		if( $out == '' ) {
-			header( 'Location: ?function=user' );
-		} 
-	break;
-}
-
-switch ( $game ) {
-	case 'create':
-		CBcreategame();
-		header( 'Location: ?function=user' );
-	break;
-	case 'update':
-		CBgetcurrentuser();
-		CBupdategame( $id );
-		header( 'Location: ?game=view&id='.$id );
-	break;
-	case 'avatar':
-		CBuploadavatar();
-		header( 'Location: ?function=user' );
-	break;
-}
-
-switch ($comment) {
-	case 'save':
-		CBsaveforum( $id, false );
-		header( 'Location: ?game=view&id='.$id );
-	break;
-} 
-
-
-$out .= CBdisplayhead( false )
-	.CBdisplaytop( false )
-	.CBdisplaymain( $id, false )
-	.CBdisplayend( false );
-	
-return processOutput( $out, true );
+$out = CBdisplayhead( )
+ .CBdisplaytop( )
+ .CBdisplaymain( $id )
+ .CBdisplayend( );
+ 
+print $out;
 
 

@@ -24,7 +24,7 @@ function CBdisplayhead( $print_on = true ) {
 <link rel="stylesheet" type="text/css" href="./style/default.css"/>
 </head>
 <body>';
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -35,7 +35,7 @@ function CBdisplaytop( $print_on = true )
 	.CBdisplaymenu( false )
 	.CBdisplaytitle( false )
 	."\n";
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -49,30 +49,17 @@ function CBMenuButton( $btntile, $href = "", $class = "", $decoration = 'star' )
 
 function CBdisplaymenu( $print_on = true )
 {
-	global $news, $game, $function, $message, $forum, $player, $out;
+	global $function;
 	
 	$currentuser = CBgetcurrentuser();
 
-	$out = "\n\n".'<!-- MENU START --><div class="menu"><a href="."><img class="logo" alt="Logo" src="./img/logo.png" />';
-	// </a><a class="button home" href=".">Home</a>
-
-	if(($player == 'view') || ($game == 'view')) {
-		$out .= "\n<a class=\"activebutton\" href=\"?player=view&amp;letter=A\">Players</a>";
-	} else {
-		$out .= "\n<a class=\"button\" href=\"?player=view&amp;letter=A\">Players</a>";
-	}
+	$out = "\n\n".'<!-- MENU START --><div class="menu"><a href="."><img class="logo" alt="Logo" src="./img/valby.png" /></a><a class="button home" href=".">Home</a>';
 
 	if($currentuser) {	
 		if($function == 'users') {
 			$out .= "\n<a class=\"activebutton\" href=\"?function=users\">Users</a>";
 		} else {
 			$out .= "\n<a class=\"button\" href=\"?function=users\">Users</a>";
-		}
-
-		if($forum == 'view') {
-			$out .= "\n<a class=\"activebutton\" href=\"?forum=view\">Forum</a>";
-		} else {
-			$out .= "\n<a class=\"button\" href=\"?forum=view\">Forum</a>";
 		}
 	}
 
@@ -83,25 +70,15 @@ function CBdisplaymenu( $print_on = true )
 		$out .= "\n<a class=\"activebutton\" href=\"?function=login\">Login</a>";
 	}
 
-	$karma = CBgetkarma($currentuser);
-	$karma = $karma . ' (' . CBgetrating($karma) . ')';
-	
-	if(($currentuser) && ($function <> 'user') && ($message <> 'new') &&  ($game <> 'new')) {
-		$out .= "\n<a class=\"button\" href=\"?function=user\">$karma</a>";
-	}
-	if((($function == 'user') && (CBgetcurrentuser())) || ($message == 'new') || ($game == 'new')) {
-		$out .= "\n<a class=\"activebutton\" href=\"?function=user\">$karma</a>";
-	}
+	$out .= "\n</div><div class=\"inlineclear\"></div>";
 
-	$out .= "\n</div>";
-
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
 
-function CBdisplaymain( $id, $print_on = true ) {
-	global $function, $message, $game, $player, $comment, $news, $note, $forum;
+function CBdisplaymain( $id ) {
+	global $function;
 
 	$out = "\n\n".'<!-- MAIN START -->'."\n\n".'<div class="main">';
 
@@ -111,86 +88,15 @@ function CBdisplaymain( $id, $print_on = true ) {
 
 	switch( $function ) {
 	case 'login':
-		$out .= CBdisplaysignup( false );
+		$out .= CBdisplaysignup( );
+		$frontpage = false;
+	break;
+	case 'newuser':
+		CBcreatenewuser();
 		$frontpage = false;
 	break;
 	case 'user':
-		$out .= CBdisplayuserpage( false );
-		$frontpage = false;
-	break;
-	case 'upload':
-		$out .= CBdisplaygameupload( $id, false );
-		$frontpage = false;
-	break;
-	case 'import':
-		$out .= CBimportgame( $id, false );
-		$frontpage = false;
-	break;
-	case 'manual':
-		$out .= CBdisplaymanual( false );
-		$frontpage = false;
-	break;
-	case 'players':
-		$out .= CBdisplayplayers( false );
-		$frontpage = false;
-	break;
-	}
-
-	// ======================================
-	switch( $forum ) {
-	case 'view':
-		$out .= CBdisplayforum( false );
-		$frontpage = false;
-	break;
-	}
-
-	// ======================================
-	switch( $message ) {
-	case 'view':
-		$out .= CBdisplaymessage( $id, false );
-		$frontpage = false;
-	break;
-	case 'new':
-		$out .= CBdisplaynewmessage( false );
-		$frontpage = false;
-	break;
-	case 'reply':
-		$out .= CBreplymessage( $id, false );
-		$frontpage = false;
-	break;
-	}
-
-	// ======================================
-	switch( $game ) {
-	case 'new':
-		$out .= CBnewdocument( false );
-		$frontpage = false;
-	break;
-	case 'view':
-		if( $step ) {
-			$out .= CBviewgame( $id, $step, false );
-		} 
-		$frontpage = false;
-	break;
-	case 'edit':
-		$out .= CMeditgame( $id, false );
-		$frontpage = false;
-	break;
-
-	}
-
-	// ======================================
-	switch( $player ) {
-	case 'view':
-		$out .= CBdisplayplayer( $id, false );
-		$frontpage = false;
-	break;
-	case 'new':
-		$out .= CBnewplayer( false );
-		$frontpage = false;
-	break;
-	case 'edit':
-		$out .= CBeditplayer( $id, false );
+		$out .= CBdisplayuserpage( );
 		$frontpage = false;
 	break;
 	}
@@ -202,175 +108,73 @@ function CBdisplaymain( $id, $print_on = true ) {
 	}
 
 	$out .= "\n</div>";
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
 
 function CBdisplayend( $print_on = true )
 {
-	global $SQLcounter, $SQLtime, $SQLsize, $starttime, $Version;
-
-	CBclosedb();//ensure no more db action and its clean thereafter
-	$now = microtime();
+	global $Version;
 
 	$out = "\n\n".'<!-- END START -->
 <div class="inlineclear"></div>
-<div class="end"><a href="https://github.com/mchlgade/ChessBase">Yet Another ChessBase Clone</a> <b>'.$Version.'</b><br />
-<small><b>' .getNumberFormatted( $SQLcounter, 0 ) .'</b> statements,
-<b>' .getNumberFormatted( $now - $starttime, -5 ) .'</b> seconds,
-<b>' .sizeFormat( $SQLsize, -3 ) .'</b></small>
+<div class="end"><a href="https://github.com/mchlgade/ChessBase">github.com/mchlgade/ChessBase</a> <b>'.$Version.'</b><br />
 <div class="inlineclear"></div>
 <a href="https://www.catb.org/hacker-emblem/"><img style="border: 0; margin : 5px;" src="./img/hacker.png"/></a>
 </div>
 </body>
 </html>
 <!-- END OF LINE -->';
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
 
-function CBdisplaylocation( $print_on = true ) {
-	global $player, $game, $id;
-	if( $player == 'view' ) {
-		$out .= CBdisplayplayerlocation( $id, false );
-	}
-	if( $game == 'view' ) {
-		$out .= CBdisplaygamelocation( false );
-	}
-	return processOutput( $out, $print_on );
-}
-
-// ============================================================================
-
-function CBdisplaytitle( $print_on = true ) {
-	global $function, $message, $game, $player, $id, $step, $format, $comment, $news, $forum;
+function CBdisplaytitle( ) {
+	global $function;
+	global $pagename;
+	global $id;
 
 	//default
-	$title = "~ Yet Another ChessBase Clone ~";
+	$title = "~ " . $pagename . " ~";
 
 	$out = '<p class="pagetitle">';
-
-	switch($player) {
-	case 'view':
-		$playername = CBgetplayername($id);
-		$title = "~ $playername ~";
-	break;
-	case 'new':
-		$title ="Add Player";
-	break;
-	case 'edit':
-		$title = "Edit Player";
-	break;
-	}
-
-	switch( $game ) {
-	case 'view':
-		$gamename = CBgetgametitle( $id );
-
-		if($gamename) {
-			$title = "$gamename";
-		} else {
-			$title = "&nbsp;";
-		}
-	break;
-	case 'edit':
-		$gamename = CBgetgametitle( $id );
-		$title = "$gamename";
-	break;
-	}
 
 	switch($function) {
 	case 'login':
 		$title = 'Login';
 	break;
 	case 'user':
-		if($id) {
-			$title = CBgetuserhandle($id);
-				} else {
-			$title = CBgetcurrentuser();
-		}
-		
-		$title = 'User #'.$title;
-	break;
-	case 'upload':
-		$gamename = CBgetgametitle( $id );
-		$title = "Upload '$gamename'";
-	break;
-	case 'players':
-		$title = '~ Highest Rated Players ~';
-	break;
-	case 'import':
-		$gamename = CBgetgametitle( $id );
-		$title = "Uploading '$gamename'";
-	break;
-	case 'manual':
-		$title = "~ Manual ~";
-	break;
-	}
-
-
-	switch($news) {
-	case 'view':
-		$title = "~ Latest News ~";
-	break;
-	case 'add':
-		$title = "~ Add News ~";
-	break;
-	case 'edit':
-		$title = "~ Edit News ~";
-	break;
-	}
-
-	switch($message) {
-	case 'view':
-		$result = CBfiresql("SELECT handle,subject FROM message WHERE id=$id");
-		$thisrow = pg_Fetch_Object( $result, 0 );
-		$handle = $thisrow->handle;
-		$subject = $thisrow->subject;
-
-		if( hasRights( 'readmsg', array( $handle ) ) ) {
-			$title = "~ $subject ~";
-		} else {
-			$title = "Cookiii baaaaaadddd...";
-		}
-	break;
-	case 'new':
-		$title = "~ New Message ~";
-	break;
-	case 'reply':
-		$title = "~ Reply Message ~";
-	break;
-	}
-
-	switch($game) {
-	case 'new':
-		$title = "Create New Game";
-	break;
-	}
-	
-	switch ($forum) {
-	case 'view':
-		if($id > 0) {
-			$title = CBgetforumtitle($id);
-		} else {		
-			$title = "Chessplayers talking Shit ...";
-		}
+		$title = CBgetuserhandle(CBgetcurrentuserID());
 	break;
 	}
 
 	$out .= $title .'</p>';
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
 
-function CBdisplayfrontpage( $print_on = true ) {
+function CBdisplayfrontpage( ) {
 	global $out;
+	global $currentposition;
+	global $boardsize;
+	global $reversed;
+	global $dark;
+	global $lite;
 
-	$out .= '<img style="float:right;margin-left:20px;margin-bottom:10px" src="./img/about.jpg" />';
+	$out .= '<img style="float:right;margin-left:20px;margin-bottom:10px" src="./img/about.png" />';
 
+	// output currentposition as image
+	ob_start();
+        CBdisplayboard($currentposition,$boardsize,$reversed,$dark,$lite);
+        $rawImageBytes = ob_get_clean();
+
+        $out .= '<img style="float:left;margin-left:20px;margin-bottom:10px" src="data:image/png;base64,' 
+        . base64_encode( $rawImageBytes ) 
+        . '" />';
+	
 	$out .= '<p class="BoxText" style="text-align:center">';
 
 	$result = CBfiresql("SELECT id FROM game WHERE status=3 ORDER BY posted_on DESC LIMIT 20");
@@ -383,25 +187,7 @@ function CBdisplayfrontpage( $print_on = true ) {
 	}
 	$out .= "\n</p>";
 
-	if( CBgetkarma(CBgetcurrentuser()) > 50) {
-		
-		$result = CBfiresql("SELECT DISTINCT(doc_id) AS id FROM korrektur");
-	
-		if(pg_numrows($result) > 0) {
-			$out .= '<p class="Head1">Books with edits</p><p class="BoxText" style="text-align:center">';	
-		}
-	
-		for($row=0;$row<pg_numrows($result);$row++) {
-			$thisrow = pg_Fetch_Object($result,$row);
-			$thisid = $thisrow->id;
-			$out .= "\n<a href=\"?document=view&amp;id=$thisid\"><img class=\"FrontCover\" alt=\"Cover\" src=\"./covers/cover$thisid\" /></a>";
-		}
-		if(pg_numrows($result) > 0) {
-			$out .= "\n</p>";
-		}
-	}
-
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -423,7 +209,7 @@ function CBgetlatestcomment( $print_on = true ) {
 	}
 	
 	$result = "<div class=\"box\"><div class=\"boxheader\"><a href=\"?game=view&amp;id=$this\"><img class=\"FrontCover\" style=\"float : right;margin : 0;margin-left : 10px;margin-bottom : 5px\" src=\"./covers/cover$thisdocument\" /></a><img class=\"docicon\" src=\"./users/$image.png\" /> &nbsp;" . getRatingDisplay($thisrating) . "</div><div class=\"boxtext\"><sup>Added by : <b>$thishandle</b> (<i>$thisdate</i>)</sup><br />$thisbody</div><div class=\"inlineclear\"></div></div>";
-	return processOutput( $result, $print_on );
+	return $result;
 }
 
 // ============================================================================
@@ -519,7 +305,7 @@ function CBdisplay( $text , $type, $print_on = true ) {
 		$out .= "\n<p class=\"BoxHead\">$text</p>";
 	break;
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 
@@ -530,7 +316,7 @@ function CBdisplaymanual( $print_on = true )
 	setTimeZone();
 	$out = '';
 	CBdisplay( 'A helpful documentation for all of you that are willing to rise from ordinary Reader to Librarian or are eager to know sligtly more about this place and how it works.', 8, false );
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -566,7 +352,7 @@ function CBdisplayusers( $print_on = true )
 		if($ricochet) $out .= "<br/><b>Ricochet</b>&nbsp;:&nbsp;$ricochet ";
 		$out .= "</small></div><div class=\"inlineclear\"> </div>";		
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
@@ -596,7 +382,7 @@ function CBdisplayplayers( $print_on = true )
 <div class="boxtext">Added <b>' .$thisrow->docs .'</b> games between <b>' .CBfixdate( $thisrow->first ) .'</b> and <b>' .CBfixdate( $thisrow->last ) .'</b> (~<b>' .$gamesperweek .'</b>&nbsp;games/week)</div><div class="inlineclear"></div></div>';
 
 	}
-	return processOutput( $out, $print_on );
+	return $out;
 }
 
 // ============================================================================
