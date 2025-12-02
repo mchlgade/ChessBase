@@ -18,8 +18,7 @@ error_reporting(E_ALL ^E_NOTICE ^E_DEPRECATED);
 //error_reporting(E_ALL ^E_STRICT);
 ini_set('display_errors', '1');
 
-$pagename = "Valby Skakklub";
-$Version = "";
+$pagename = "ChessBase til Valby Skakklub";
 
 require 'settings.php';
 require 'CB.common.php';
@@ -33,20 +32,45 @@ $id = 0;
 $function = null;
 $player = null;
 $pass1 = null;
-
-$currentposition = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'; // FEN start
+$map = null;
+$select = null;
+$currentmap = '<map name="workmap">';
+$currentgame = 'e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f1c4 g8f6 e1g1';
+$currentpgn = CBgetpgn($currentgame);
+$currentposition = 'rnbqkbnr/pppppppp/11111111/11111111/11111111/11111111/PPPPPPPP/RNBQKBNR'; // FEN Start
+$maxstep = count(explode(' ', $currentgame));
 $step = 0;
 
-$boardsize = 450;
-$reversed = 0;
+$boardsize = 560;
+$flip = 0;
 $dark = '#769656';
 $lite = '#eeeed2';
+$highlite = '#fdff15';
+$action = '#eaaeaa';
 
 if (isset($_COOKIE['CB'])) $cookie = $_COOKIE['CB'];
 if (isset($_REQUEST['function'])) $function = $_REQUEST['function'];
 if (isset($_REQUEST['pass1'])) $pass1 = $_REQUEST['pass1'];
 if (isset($_REQUEST['pass2'])) $pass2 = $_REQUEST['pass2'];
 if (isset($_REQUEST['user_name'])) $user_name = $_REQUEST['user_name'];
+if (isset($_REQUEST['flip'])) $flip = $_REQUEST['flip'];
+if (isset($_REQUEST['step'])) $step = $_REQUEST['step'];
+if (isset($_REQUEST['select'])) $select = $_REQUEST['select'];
+
+if($select) $step = $maxstep;
+if($step % 2 == 1) {
+	$movecolour = 'Black';
+} else {
+	$movecolour = 'White';
+}
+
+$moves = explode(' ', $currentgame);
+for($i=0;$i<$step;$i++) {
+	$thismove = $moves[$i];
+	$thisfrom = $thismove[0] . $thismove[1];
+	$thisto = $thismove[2] . $thismove[3];
+	CBmovepiece($thisfrom, $thisto);
+}
 
 switch( $function ) {
 	case 'login':

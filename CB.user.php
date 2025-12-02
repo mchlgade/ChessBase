@@ -119,8 +119,6 @@ function CBvalidateuser($pass1,$pass2)
 
 	$result = CBfiresql("SELECT id FROM \"user\" WHERE handle='$username'");
 	
-//	die("Validate User ..: ". $username . " : " . $pass1 . " : " . $pass2);
-	
 	if(pg_num_rows($result) == 1) {
 		return true;
 	} else {
@@ -194,14 +192,8 @@ function CBdisplayuserpage( ) {
 	$karma = $thisrow->karma;
 	$out = null;
 	
-//	if(file_exists("./users/".$thisid.".png")) {	
-//		$out = "<div class=\"order\"><img style=\"float:left\" src=\"./users/".$thisid.".png\">";
-//	} else {
-//		$out = "<div class=\"order\"><img style=\"float:left\" src=\"./users/Anonymous.png\">";
-//	}
-	
-	$out .= "</small></div><div class=\"inlineclear\"> </div>"
-	.CBdisplaygames( )
+	$out .= "<div class=\"inlineclear\"> </div>"
+	.CBdisplaymygames( )
 	.CBdisplaymessages( );
 	return $out;
 }
@@ -263,7 +255,7 @@ function CBdisplaymessages( ) {
 
 // ============================================================================
 
-function CBdisplaygames( ) {
+function CBdisplaymygames( ) {
 	$user = CBgetcurrentuser();
 
 	$out = '';
@@ -458,6 +450,8 @@ function CBsendmessage( $to, $msg, $from = 'SYSTEM', $subj = 'Message' ) {
 	}
 	return $out;
 }
+
+// ============================================================================
 
 function hasRights( $action = '', $arr = array() )
 {

@@ -47,30 +47,56 @@ function CBMenuButton( $btntile, $href = "", $class = "", $decoration = 'star' )
 
 // ============================================================================
 
-function CBdisplaymenu( $print_on = true )
+function CBdisplaymenu( )
 {
 	global $function;
 	
 	$currentuser = CBgetcurrentuser();
+// <img class=\"logo\" src=\"./img/valby.png\"/>
+	$out = "<!-- MENU START --><div class=\"menu\">&nbsp;&nbsp;";
+	$out .= '<img class="logo" src="img/logo.png" />';
+	if($function == "") {
+		$out .= "\n\n".'<a class="activebutton home" href=".">Hjem</a>';
+	} else {
+		$out .= "\n\n".'<a class="button home" href=".">Hjem</a>';
+	}
 
-	$out = "\n\n".'<!-- MENU START --><div class="menu"><a href="."><img class="logo" alt="Logo" src="./img/valby.png" /></a><a class="button home" href=".">Home</a>';
-
-	if($currentuser) {	
-		if($function == 'users') {
-			$out .= "\n<a class=\"activebutton\" href=\"?function=users\">Users</a>";
+	if($function == 'members') {
+		$out .= "\n<a class=\"activebutton spark\" href=\"?function=members\">Medlemmer</a>";
+	} else {
+		$out .= "\n<a class=\"button spark\" href=\"?function=members\">Medlemmer</a>";
+	}
+	
+	if($function == 'tournaments') {
+		$out .= "\n<a class=\"activebutton spark\" href=\"?function=tournaments\">Turneringer</a>";
+	} else {
+		$out .= "\n<a class=\"button spark\" href=\"?function=tournaments\">Turneringer</a>";
+	}
+	
+	if($function == 'games') {
+		$out .= "\n<a class=\"activebutton spark\" href=\"?function=games\">Partier</a>";
+	} else {
+		$out .= "\n<a class=\"button spark\" href=\"?function=games\">Partier</a>";
+	}
+	
+	if($currentuser) {
+		$title = CBgetuserhandle(CBgetcurrentuserID());
+		if($function == 'user') {
+			$out .= "\n<a class=\"activebutton email\" href=\"?function=user\">" . $title . "</a>";
 		} else {
-			$out .= "\n<a class=\"button\" href=\"?function=users\">Users</a>";
+			$out .= "\n<a class=\"button email\" href=\"?function=user\">" . $title . "</a>";
 		}
+		$out .= "\n<a class=\"button prev\" href=\"?function=logout\">Logout</a>";
 	}
 
 	if( ( !$currentuser ) && ( $function <> 'login' ) ) {
-		$out .= "\n<a class=\"button\" href=\"?function=login\">Login</a>";
+		$out .= "\n<a class=\"button next\" href=\"?function=login\">Login</a>";
 	}
 	if( ( !$currentuser ) && ( $function == 'login' ) ) {
-		$out .= "\n<a class=\"activebutton\" href=\"?function=login\">Login</a>";
+		$out .= "\n<a class=\"activebutton next\" href=\"?function=login\">Login</a>";
 	}
 
-	$out .= "\n</div><div class=\"inlineclear\"></div>";
+	$out .= "\n<div class=\"inlineclear\"></div>";
 
 	return $out;
 }
@@ -99,6 +125,18 @@ function CBdisplaymain( $id ) {
 		$out .= CBdisplayuserpage( );
 		$frontpage = false;
 	break;
+	case 'members':
+		$out .= CBdisplaymembers();
+		$frontpage = false;
+	break;
+	case 'tournaments':
+		$out .= CBdisplaytournaments();
+		$frontpage = false;
+	break;
+	case 'games':
+		$out .= CBdisplaygames();
+		$frontpage = false;
+	break;
 	}
 
 	// ======================================
@@ -113,13 +151,13 @@ function CBdisplaymain( $id ) {
 
 // ============================================================================
 
-function CBdisplayend( $print_on = true )
+function CBdisplayend( )
 {
 	global $Version;
 
 	$out = "\n\n".'<!-- END START -->
 <div class="inlineclear"></div>
-<div class="end"><a href="https://github.com/mchlgade/ChessBase">github.com/mchlgade/ChessBase</a> <b>'.$Version.'</b><br />
+<div class="end"><a class="button like" href="https://github.com/mchlgade/ChessBase">&nbsp;&nbsp;GitHub.com/mchlgade/ChessBase&nbsp&nbsp;</a><br />
 <div class="inlineclear"></div>
 <a href="https://www.catb.org/hacker-emblem/"><img style="border: 0; margin : 5px;" src="./img/hacker.png"/></a>
 </div>
@@ -135,6 +173,7 @@ function CBdisplaytitle( ) {
 	global $function;
 	global $pagename;
 	global $id;
+	global $currentgame;
 
 	//default
 	$title = "~ " . $pagename . " ~";
@@ -148,33 +187,107 @@ function CBdisplaytitle( ) {
 	case 'user':
 		$title = CBgetuserhandle(CBgetcurrentuserID());
 	break;
+	case 'members':
+		$title = 'Medlemmer';
+	break;
+	case 'tournaments':
+		$title = 'Aktive turneringer';
+	break;
+	case 'games':
+		$title = $currentgame;
+	break;
+	
 	}
 
-	$out .= $title .'</p>';
+	$out .= $title .'</p></div>';
 	return $out;
 }
 
 // ============================================================================
 
 function CBdisplayfrontpage( ) {
+	$user = CBgetcurrentuser();
+	
+	$out = "\n<div class=\"box\"><div class=\"boxheader\"><b>Nyheder</b></div><div class=\"boxtext\">Nyheder fra Valby Skakklub ... tilgår.</div></div>";
+
+	if($user <> '') {
+		$out .= "\n<p class=\"boxtext\"><a class=\"button add\" href=\"?function=addnews\">Add News</a></p></div>";
+	}
+	return $out;
+}
+
+// ============================================================================
+
+function CBdisplaymembers() {
+	$user = CBgetcurrentuser();
+	$out = "\n<div class=\"box\"><div class=\"boxheader\"><b>Medlemmer af Valby Skakklub</b></div><div class=\"boxtext\">Der er ingen medlemmer endnu :)</div></div>";
+	
+	if($user <> '') {
+		$out .= "\n<p class=\"boxtext\"><a class=\"button add\" href=\"?function=addmember\">Add Member</a></p>";
+	}
+	return $out;
+}
+
+// ============================================================================
+
+function CBdisplaytournaments() {
+	$user = CBgetcurrentuser();
+	
+	$out = "\n<div class=\"box\"><div class=\"boxheader\"><b>Turneringer</b></div><div class=\"boxtext\">Vi har ingen turneringer, spil noget Ludo.  </div></div>";
+	if($user <> '') {
+		$out .= "\n<p class=\"boxtext\"><a class=\"button add\" href=\"?function=addtournament\">Add Tournament</a></p>";
+	}
+	return $out;
+}
+
+// ============================================================================
+
+function CBdisplaygames() {
 	global $out;
 	global $currentposition;
+	global $currentpgn;
+	global $currentmap;
+	global $movecolour;
+	global $castleimg;
+	global $maxstep;
+	global $map;
 	global $boardsize;
-	global $reversed;
+	global $flip;
 	global $dark;
 	global $lite;
-
-	$out .= '<img style="float:right;margin-left:20px;margin-bottom:10px" src="./img/about.png" />';
+	global $step;
+	global $select;
+	global $lastfrom;
+	global $lastto;
 
 	// output currentposition as image
 	ob_start();
-        CBdisplayboard($currentposition,$boardsize,$reversed,$dark,$lite);
-        $rawImageBytes = ob_get_clean();
+        CBdisplayboard($currentposition,$boardsize,$flip,$dark,$lite);
+        $raw = ob_get_clean();
+        $out .= '<img class="chessboard" src="data:image/png;base64,' 
+        . base64_encode( $raw ) 
+        . '" usemap="#workmap"/>';
+        $out .= $currentmap;
+	$out .= '<div class="box"><div class="boxheader">';
+	if($step > 0) {
+		$out .= '<a class="button prev" href="?function=games&step=' .($step - 1). '">Prev</a>';
+	}
+	if($flip == 1) {
+		$out .= '<a class="button" href="?function=games&step='.$step.'">Flip</a>';
+	} else {
+		$out .= '<a class="button" href="?function=games&flip=1&step='.$step.'">Flip</a>';
+	}
+	if($step < $maxstep) {
+		$out .= '<a class="button next" href="?function=games&step=' .($step + 1). '">Next</a>';
+	}
 
-        $out .= '<img style="float:left;margin-left:20px;margin-bottom:10px" src="data:image/png;base64,' 
-        . base64_encode( $rawImageBytes ) 
-        . '" />';
+	$out.= '&nbsp;&nbsp;&nbsp;<b>'. $movecolour . '</b> to move.</div>';
 	
+	$out .= '<div class="boxtext">' . $map . '</div>';
+	
+
+
+
 	$out .= '<p class="BoxText" style="text-align:center">';
 
 	$result = CBfiresql("SELECT id FROM game WHERE status=3 ORDER BY posted_on DESC LIMIT 20");
@@ -188,6 +301,38 @@ function CBdisplayfrontpage( ) {
 	$out .= "\n</p>";
 
 	return $out;
+}
+
+// ============================================================================
+
+function CBdisplaynews() {
+//	$out = '';
+//	$sql = CBfiresql("SELECT id,headline,body,author,posted FROM news ORDER BY posted DESC LIMIT 20");
+//	for($row=0;$row<pg_numrows($sql);$row++) {
+//		$thisrow = pg_Fetch_Object($sql,$row);
+//		$thisid = $thisrow->id;
+//		$thishead = $thisrow->headline;
+//		$thisbody = nl2br($thisrow->body);
+//		$thisauthor = $thisrow->author;
+//		$date = RMLfixdate( $thisrow->posted );
+
+//		$out .= "\n".'<div class="box">
+//<div class="boxheader"><b>'.$thishead.'</b></div><div style="text-align:right;padding-right:15px"><small><i>by</i> : <b>'.$thisauthor.'</b> (<i>'.$date.'</i>)</small>'
+//		.( ( hasRights( 'delnews', array( $thisauthor ) ) )
+//			? "\n".'<a href="?news=delete&amp;id='.$thisid.'"><img style="float : right;margin-top:-28px" alt="Delete" src="img/delete.png" /></a><br/>'
+			//.' <a class="button edit" href="?news=edit">Edit News</a>'
+//			: ''
+//		)
+//		.'</div><div class="boxtext">'.$thisbody.'</div>
+//</div>'	;
+//	}
+//	if( hasRights( 'addnews' ) ) {
+//		$out .=
+//		"\n".'<a class="button add" href="?news=add">Add News</a>'
+//		;
+//	}
+//	return $out;
+	
 }
 
 // ============================================================================

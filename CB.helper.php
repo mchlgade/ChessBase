@@ -131,38 +131,6 @@ function CBcreateplayer( $player )
 
 // ============================================================================
 
-function CBdisplaynews( $print_on = true )
-{
-	$out = '';
-	$sql = CBfiresql("SELECT id,headline,body,author,posted FROM news ORDER BY posted DESC LIMIT 20");
-	for($row=0;$row<pg_numrows($sql);$row++) {
-		$thisrow = pg_Fetch_Object($sql,$row);
-		$thisid = $thisrow->id;
-		$thishead = $thisrow->headline;
-		$thisbody = nl2br($thisrow->body);
-		$thisauthor = $thisrow->author;
-		$date = RMLfixdate( $thisrow->posted );
-
-		$out .= "\n".'<div class="box">
-<div class="boxheader"><b>'.$thishead.'</b></div><div style="text-align:right;padding-right:15px"><small><i>by</i> : <b>'.$thisauthor.'</b> (<i>'.$date.'</i>)</small>'
-		.( ( hasRights( 'delnews', array( $thisauthor ) ) )
-			? "\n".'<a href="?news=delete&amp;id='.$thisid.'"><img style="float : right;margin-top:-28px" alt="Delete" src="img/delete.png" /></a><br/>'
-			//.' <a class="button edit" href="?news=edit">Edit News</a>'
-			: ''
-		)
-		.'</div><div class="boxtext">'.$thisbody.'</div>
-</div>'	;
-	}
-	if( hasRights( 'addnews' ) ) {
-		$out .=
-		"\n".'<a class="button add" href="?news=add">Add News</a>'
-		;
-	}
-	return $out;
-}
-
-// ============================================================================
-
 function CBaddnews( $print_on = true )
 {
 	if( ! hasRights( 'addnews' ) ) {

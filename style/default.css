@@ -25,8 +25,9 @@ body {
 }
 
 .menu {
-	padding-left	: 5px;
-	padding-top	: 5px
+	padding-left	: 0;
+	padding-top	: 5px;
+	background-color : #eee
 }
 
 table.main {
@@ -42,10 +43,20 @@ table.main td {
 	border-color	: black	
 }
 
+img.chessboard {
+  float : left;
+  margin-right : 20px;
+  margin-bottom : 10px;
+	border-style	: solid;
+	border-width	: 3px;
+	border-color	: black	
+}
+
 img.logo {
 	margin			: 0px;
+	margin-bottom : -45px;
 	border			: 0;
-	padding-right	: 5px;
+	padding-right	: 10px;
 	float			: right;
 }
 
@@ -149,19 +160,11 @@ img.bottom {
 	padding-top		: 10px;
 	padding-bottom	: 10px;
 	color			: black;
+	background-color : #eee;
 	text-align		: center;
 	border-top-width : 2px;
 	border-top-style : dotted;
 	border-top-color : black	
-}
-
-.end b {
-	color			: red
-}
-
-.end a {
-	color			: red;
-	font-weight		: normal
 }
 
 .left {
@@ -212,9 +215,8 @@ img.bottom {
 p.pagetitle {
 	padding			: 0;
 	margin			: 0;
-	padding-bottom	: 10px;
-	font-size		: 24pt;
-	color			: #222;
+	padding-bottom	: 5px;
+	font-size		: 28pt;
 	font-weight		: bold;
 	text-shadow		: -2px -2px 2px #777;
 	text-align		: center;
@@ -650,12 +652,12 @@ sub
 	background-image: -o-linear-gradient(top, #eee, #bbb);
 	background-image: linear-gradient(top, #eee, #bbb);
 	border: 1px solid #777;
-	padding: 0;
-	padding-left: 0.5em;
-	padding-right: 0.5em;
-	margin-bottom: 0.2em;
+  padding: 0;	
+	padding-left: 1em;
+	padding-right: 1em;
+	margin-bottom: 0.5em;
 	margin-top: 0.1em;
-	font: bold 0.8em/1.8em sans-serif;
+	font: bold 12pt/1.8em sans-serif;
 	text-decoration: none;
 	color: #333;
 	text-shadow: 0 1px 0 rgba(255,255,255,.8);
@@ -674,11 +676,11 @@ sub
 	background-image: linear-gradient(top, #cfc, #44dd44);
 	border: 1px solid #777;
 	padding: 0;
-	padding-left: 0.5em;
-	padding-right: 0.5em;
-	margin-bottom: 0.2em;
+	padding-left: 1em;
+	padding-right: 1em;
+	margin-bottom: 0.5em;
 	margin-top: 0.1em;
-	font: bold 0.8em/1.8em sans-serif;
+	font: bold 12pt/1.8em sans-serif;
 	text-decoration: none;
 	color: #333;
 	text-shadow: 0 1px 0 rgba(255,255,255,.8);
@@ -724,10 +726,10 @@ sub
 	width: 0.8em;
 	text-align: center;
 	font-size: 1.25em;
-	margin: 0 0.5em 0 -0.4em;
-	padding: 0 .3em;
+	margin:  0px 0.5em 0 -0.8em;
+	padding: 0 .5em;
 	box-shadow: 1px 0 0 rgba(0,0,0,.5), 2px 0 0 rgba(255,255,255,.5);
-	border-radius: .5em 0 0 .2em;
+	border-radius: .5em 0 0 .5em; 
 	pointer-events: none;
 }
 
