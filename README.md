@@ -1,5 +1,3 @@
-![Valby Skakklubs WebBase](img/logo.png "Valby Skakklub")
-
 # ChessBase
 
 Yest another ChessBase clone for Web
