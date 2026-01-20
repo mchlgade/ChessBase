@@ -56,15 +56,15 @@ function CBdisplaymenu( )
 	$out = "<!-- MENU START --><div class=\"menu\">&nbsp;&nbsp;";
 	$out .= '<img class="logo" src="img/logo.png" />';
 	if($function == "") {
-		$out .= "\n\n".'<a class="activebutton home" href=".">Hjem</a>';
+		$out .= "\n\n".'<a class="activebutton home" href="./index.php">Hjem</a>';
 	} else {
-		$out .= "\n\n".'<a class="button home" href=".">Hjem</a>';
+		$out .= "\n\n".'<a class="button home" href="./index.php">Hjem</a>';
 	}
 
 	if($function == 'members') {
-		$out .= "\n<a class=\"activebutton spark\" href=\"?function=members\">Medlemmer</a>";
+		$out .= "\n<a class=\"activebutton spark\" href=\"?function=members\">Spillere</a>";
 	} else {
-		$out .= "\n<a class=\"button spark\" href=\"?function=members\">Medlemmer</a>";
+		$out .= "\n<a class=\"button spark\" href=\"?function=members\">Spillere</a>";
 	}
 	
 	if($function == 'tournaments') {
@@ -173,7 +173,7 @@ function CBdisplaytitle( ) {
 	global $function;
 	global $pagename;
 	global $id;
-	global $currentgame;
+	global $currentposition;
 
 	//default
 	$title = "~ " . $pagename . " ~";
@@ -188,13 +188,13 @@ function CBdisplaytitle( ) {
 		$title = CBgetuserhandle(CBgetcurrentuserID());
 	break;
 	case 'members':
-		$title = 'Medlemmer';
+		$title = 'Spillere';
 	break;
 	case 'tournaments':
-		$title = 'Aktive turneringer';
+		$title = 'Turneringer';
 	break;
 	case 'games':
-		$title = $currentgame;
+		$title = 'Partier';
 	break;
 	
 	}
@@ -245,6 +245,8 @@ function CBdisplaytournaments() {
 function CBdisplaygames() {
 	global $out;
 	global $currentposition;
+	global $currentgame;
+	global $currentresult;
 	global $currentpgn;
 	global $currentmap;
 	global $movecolour;
@@ -268,26 +270,25 @@ function CBdisplaygames() {
         . base64_encode( $raw ) 
         . '" usemap="#workmap"/>';
         $out .= $currentmap;
-	$out .= '<div class="box"><div class="boxheader">';
+
+	$out .= '<div class="playernames"><b>Michael Gade</b> (1490) Vs <b>Katrine Cæcilie Rosenkilde</b> (1609)</div><div class="moves">' . $currentpgn . '</div>';
+	
+	$out .= '<div class="boxtext">';
 	if($step > 0) {
-		$out .= '<a class="button prev" href="?function=games&step=' .($step - 1). '">Prev</a>';
-	}
-	if($flip == 1) {
-		$out .= '<a class="button" href="?function=games&step='.$step.'">Flip</a>';
+		$out .= '<a class="button prev" href="?function=games&flip='.$flip.'&step=' .($step - 1). '">Prev</a>';
+	} 
+	if($flip) {
+		$out .= ' <a class="button" href="?function=games&flip=0&step='.$step.'">Flip</a> ';
 	} else {
-		$out .= '<a class="button" href="?function=games&flip=1&step='.$step.'">Flip</a>';
+		$out .= ' <a class="button" href="?function=games&flip=1&step='.$step.'">Flip</a> ';
 	}
 	if($step < $maxstep) {
-		$out .= '<a class="button next" href="?function=games&step=' .($step + 1). '">Next</a>';
+		$out .= '<a class="button next" href="?function=games&flip='.$flip.'&step=' .($step + 1). '">Next</a>';
 	}
 
-	$out.= '&nbsp;&nbsp;&nbsp;<b>'. $movecolour . '</b> to move.</div>';
+
+	//$out .= '<div class="boxtext">' . $map . '</div>';
 	
-	$out .= '<div class="boxtext">' . $map . '</div>';
-	
-
-
-
 	$out .= '<p class="BoxText" style="text-align:center">';
 
 	$result = CBfiresql("SELECT id FROM game WHERE status=3 ORDER BY posted_on DESC LIMIT 20");

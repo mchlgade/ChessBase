@@ -250,9 +250,100 @@ function CBgetsquare($col, $row) {
 
 // ===================================================================
 
-function CBgetpgn($moves) {
-	global $currentgame;
+function CBgetsan($moves) {  // Output Short Algebraric  Notation
+	global $currentposition;
+	global $startposition;
+	global $maxstep;
+	global $flip;
+	global $step;
+	global $select;
+	global $currentresult;
+	global $notationknight;
+	global $notationbishop;
+	global $notationrook;
+	global $notationqueen;
+	global $notationking;
 
+	
+	$result = '<b class="movenumber">1.</b> ';
+	$moves = explode(' ', $moves);
+
+	for ($i=0; $i < $maxstep; $i++) {
+		$thismove = $moves[$i];
+		$thisfrom = $thismove[0] . $thismove [1];
+		$thisto = $thismove[2] . $thismove[3];
+		$from = $thisfrom;
+		$to = $thisto;
+		$move = $thismove;
+		$thisfrom = CBgetindex($thisfrom);
+		$thisto = CBgetindex($thisto);
+		$old = $currentposition[$thisto];
+		$currentposition[$thisto] = $currentposition[$thisfrom];
+		$currentposition[$thisfrom] = '1';
+		
+		if(($currentposition[$thisto] == 'p') || ($currentposition[$thisto] == 'P')) {
+			if($old == '1') $thismove = $to;
+			if($old <> '1') $thismove = $from[0].'x'.$to;
+		}
+		if(($currentposition[$thisto] == 'n') || ($currentposition[$thisto] == 'N')) {
+			if($old == '1') $thismove = $notationknight.$to;
+			if($old <> '1') $thismove = $notationknight .'x' . $to;
+		}
+		if(($currentposition[$thisto] == 'b') || ($currentposition[$thisto] == 'B')) {
+			if($old == '1') $thismove = $notationbishop.$to;
+			if($old <> '1') $thismove = $notationbishop . 'x' . $to;
+		}
+		if(($currentposition[$thisto] == 'r') || ($currentposition[$thisto] == 'R')) {
+			if($old == '1') $thismove = $notationrook.$to;
+			if($old <> '1') $thismove = $notationrook . 'x' . $to;
+		}
+		if(($currentposition[$thisto] == 'q') || ($currentposition[$thisto] == 'Q')) {
+			if($old == '1') $thismove = $notationqueen.$to;
+			if($old <> '1') $thismove = $notationqueen . 'x' . $to;
+		}
+		if(($currentposition[$thisto] == 'k') || ($currentposition[$thisto] == 'K')) {
+			if($old == '1') $thismove = $notationking.$to;
+			if($old <> '1') $thismove = $notationking . 'x' . $to;
+			if($move == 'e1g1') {
+				$currentposition[68] = 'R';
+				$currentposition[70] = '1';
+				$thismove = 'O-O';
+			}
+			if($move == 'e1c1') {
+				$currentposition[63] = '1';
+				$currentposition[66] = 'R';
+				$thismove = 'O-O-O';
+			}
+			if($move == 'e8g8') {
+				$currentposition[7] = '1';
+				$currentposition[5] = 'R';
+				$thismove = 'O-O';
+			}
+			if($move == 'e8c8') {
+				$currentposition[0] = '1';
+				$currentposition[3] = 'R';
+				$thismove = 'O-O-O';
+			}
+
+		}
+				
+		$thisstep = $i + 1;
+		if($thisstep == $step) {
+			$result .= '<b class="currentmove">'.$thismove.'&nbsp;</b>&nbsp;';
+		} else {
+			$result .= '<a class="move" href="?function=games&flip='.$flip.'&step='.($i+1).'">'.$thismove.'&nbsp;</a>';
+		}
+		if (($i % 2 == 1) && ($i > 0)) {
+			$thismove = (($i+1)/2) + 1;
+			if($i < $maxstep - 1) {
+				$result .= ' <b class="movenumber">' .$thismove. '.</b>&nbsp;';
+			}
+		}
+	}
+	if($select) $result .= '&nbsp;<b class="currentmove">' . $select . '</b>&nbsp;';
+	$result .= '</br><b class="movenumber">' .$currentresult. '</b>';
+	$currentposition = $startposition;
+	return $result;
 }
 
 // ===================================================================
@@ -312,12 +403,13 @@ function CBadd_pieces($img, $board, $flip, $sprites)
     global $select;
     
     $sq_size = imagesx($img)/8;
-
+    $hit = 0;
     for ($i=0; $i<64; $i++) {
         $p = $board[$i];
         if ($p == ' ')
             continue;
 
+	$hit++;
         $col   = $i % 8;
         $row   = ($i - $col) / 8;
 
@@ -335,7 +427,7 @@ function CBadd_pieces($img, $board, $flip, $sprites)
 	$y1 = $y + $sq_size;
 	
 	if($this_sq == $select) {
-		$map .=  '<b>'. $this_sq. '</b> : (' .$x. ',' .$y. '),(' .$x1. ',' .$y1. ')</br> ';
+		$map .=  '<b>'. $this_sq. '</b>  ';
 		if($flip) {
 			$currentmap .= '<area shape="rect" coords="'.$x.','.$y.','.$x1.','.$y1.'" href="?function=games&flip=1&step='. $maxstep . '">';
 		} else {
@@ -347,14 +439,14 @@ function CBadd_pieces($img, $board, $flip, $sprites)
 	
 	if( (CBis_upper($p)) && (!$select) && ($step == $maxstep)) {
 		if($movecolour == 'White') {
-			$map .=  '<b>'. $this_sq. '</b> : (' .$x. ',' .$y. '),(' .$x1. ',' .$y1. ')</br> ';
-			$currentmap .= '<area shape="rect" coords="'.$x.','.$y.','.$x1.','.$y1.'" href="?function=games&select='.$this_sq.'">';
+			$map .=  '<b>'. $this_sq. '</b> ';
+			$currentmap .= '<area shape="rect" coords="'.$x.','.$y.','.$x1.','.$y1.'" href="?function=games&flip='.$flip.'&select='.$this_sq.'">';
 		}
 	} 
 	if((!CBis_upper($p)) && (!$select) && ($step == $maxstep)) {
 		if($movecolour == 'Black') {
-			$map .=  '<b>'. $this_sq. '</b> : (' .$x. ',' .$y. '),(' .$x1. ',' .$y1. ') </br>';
-			$currentmap .= '<area shape="rect" coords="'.$x.','.$y.','.$x1.','.$y1.'" href="?function=games&select='.$this_sq.'">';
+			$map .=  '<b>'. $this_sq. '</b> ';
+			$currentmap .= '<area shape="rect" coords="'.$x.','.$y.','.$x1.','.$y1.'" href="?function=games&flip='.$flip.'&select='.$this_sq.'">';
 		}
 	} 
 		
