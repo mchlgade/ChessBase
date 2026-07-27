@@ -133,6 +133,9 @@ function CBmovepiece($from, $to) {
 	
 	$currentposition[$to] = $currentposition[$from];
 	$currentposition[$from] = '1';
+	
+	if(($currentposition[$to] == 'p') && ($move[3] == 1)) $currentposition[$to] = 'q';
+	if(($currentposition[$to] == 'P') && ($move[3] == 8)) $currentposition[$to] = 'Q';
 }
 
 // ===================================================================
@@ -250,7 +253,7 @@ function CBgetsquare($col, $row) {
 
 // ===================================================================
 
-function CBgetsan($moves) {  // Output Short Algebraric  Notation
+function CBgetsan($moves) {  // Output Short Algebraic Notation
 	global $currentposition;
 	global $startposition;
 	global $maxstep;
@@ -263,6 +266,8 @@ function CBgetsan($moves) {  // Output Short Algebraric  Notation
 	global $notationrook;
 	global $notationqueen;
 	global $notationking;
+	global $lastfrom;
+	global $lastto;
 
 	
 	$result = '<b class="movenumber">1.</b> ';
@@ -277,56 +282,51 @@ function CBgetsan($moves) {  // Output Short Algebraric  Notation
 		$move = $thismove;
 		$thisfrom = CBgetindex($thisfrom);
 		$thisto = CBgetindex($thisto);
-		$old = $currentposition[$thisto];
-		$currentposition[$thisto] = $currentposition[$thisfrom];
-		$currentposition[$thisfrom] = '1';
+		$old = $currentposition[$thisto]; // the piece you took
+		$was = $currentposition[$thisfrom]; // the piece you picked up
 		
-		if(($currentposition[$thisto] == 'p') || ($currentposition[$thisto] == 'P')) {
-			if($old == '1') $thismove = $to;
-			if($old <> '1') $thismove = $from[0].'x'.$to;
-		}
-		if(($currentposition[$thisto] == 'n') || ($currentposition[$thisto] == 'N')) {
+		CBmovepiece($from,$to);
+		
+		$is = $currentposition[$thisto]; // the piece you put down 
+				
+		if(($was == 'n') || ($was == 'N')) {
 			if($old == '1') $thismove = $notationknight.$to;
 			if($old <> '1') $thismove = $notationknight .'x' . $to;
 		}
-		if(($currentposition[$thisto] == 'b') || ($currentposition[$thisto] == 'B')) {
+		
+		if(($was == 'b') || ($was == 'B')) {
 			if($old == '1') $thismove = $notationbishop.$to;
 			if($old <> '1') $thismove = $notationbishop . 'x' . $to;
 		}
-		if(($currentposition[$thisto] == 'r') || ($currentposition[$thisto] == 'R')) {
+		
+		if(($was == 'r') || ($was == 'R')) {
 			if($old == '1') $thismove = $notationrook.$to;
 			if($old <> '1') $thismove = $notationrook . 'x' . $to;
 		}
-		if(($currentposition[$thisto] == 'q') || ($currentposition[$thisto] == 'Q')) {
+		
+		if(($was == 'q') || ($was == 'Q')) {
 			if($old == '1') $thismove = $notationqueen.$to;
 			if($old <> '1') $thismove = $notationqueen . 'x' . $to;
 		}
-		if(($currentposition[$thisto] == 'k') || ($currentposition[$thisto] == 'K')) {
+		
+		if(($was == 'p') || ($was == 'P')) {
+			if($old == '1') $thismove = $to;
+			if($old <> '1') $thismove = $from[0].'x'.$to;
+		}
+		
+		if($was <> $is) { // Pawn promotion			
+			$thismove .= '=' . $notationqueen;
+		}		
+		
+		if(($was == 'k') || ($was == 'K')) {
 			if($old == '1') $thismove = $notationking.$to;
 			if($old <> '1') $thismove = $notationking . 'x' . $to;
-			if($move == 'e1g1') {
-				$currentposition[68] = 'R';
-				$currentposition[70] = '1';
-				$thismove = 'O-O';
-			}
-			if($move == 'e1c1') {
-				$currentposition[63] = '1';
-				$currentposition[66] = 'R';
-				$thismove = 'O-O-O';
-			}
-			if($move == 'e8g8') {
-				$currentposition[7] = '1';
-				$currentposition[5] = 'R';
-				$thismove = 'O-O';
-			}
-			if($move == 'e8c8') {
-				$currentposition[0] = '1';
-				$currentposition[3] = 'R';
-				$thismove = 'O-O-O';
-			}
-
+			if($move == 'e1g1') $thismove = 'O-O';
+			if($move == 'e1c1') $thismove = 'O-O-O';
+			if($move == 'e8g8') $thismove = 'O-O';
+			if($move == 'e8c8') $thismove = 'O-O-O';
 		}
-				
+		
 		$thisstep = $i + 1;
 		if($thisstep == $step) {
 			$result .= '<b class="currentmove">'.$thismove.'&nbsp;</b>&nbsp;';
@@ -343,6 +343,8 @@ function CBgetsan($moves) {  // Output Short Algebraric  Notation
 	if($select) $result .= '&nbsp;<b class="currentmove">' . $select . '</b>&nbsp;';
 	$result .= '</br><b class="movenumber">' .$currentresult. '</b>';
 	$currentposition = $startposition;
+	$lastfrom = 0;
+	$lastto = 0;
 	return $result;
 }
 
@@ -420,9 +422,13 @@ function CBadd_pieces($img, $board, $flip, $sprites)
 
         $x = $col * $sq_size;
         $y = $row * $sq_size;
-        $piece = $sprites[$p];
-		
-	$this_sq = CBgetsquare($col, $row);
+        $this_sq = CBgetsquare($col, $row);
+        
+//        if(($p == 'p') && ($this_sq[1] == 1)) $p = 'q';
+//	if(($p == 'P') && ($this_sq[1] == 8)) $p = 'Q';
+	
+	$piece = $sprites[$p];
+	
 	$x1 = $x + $sq_size;
 	$y1 = $y + $sq_size;
 	

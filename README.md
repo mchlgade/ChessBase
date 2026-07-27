@@ -1,6 +1,6 @@
 # ChessBase
 
-Yest another ChessBase clone for Web
+Yet another ChessBase clone for Web
 
 ## Requirements 
 

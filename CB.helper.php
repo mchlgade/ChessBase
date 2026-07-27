@@ -131,6 +131,16 @@ function CBcreateplayer( $player )
 
 // ============================================================================
 
+function CBcreatenewplayer()
+{
+	global $player, $club, $fideid;
+
+	CBfiresql("INSERT INTO player (id, player, club, fideid) values(DEFAULT,'$player','$club','$fideid')");	
+	return true;
+}
+
+// ============================================================================
+
 function CBaddnews( $print_on = true )
 {
 	if( ! hasRights( 'addnews' ) ) {
