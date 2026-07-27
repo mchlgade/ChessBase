@@ -9,7 +9,7 @@ Yet another ChessBase clone for Web
   + incl. GD library (for image manipulation)
 * PostgreSQL (or a shitload of work and some rewrite to enable another DBMS)
   + php_pgsql (or PHP compiled with `--with-pgsql'`)
-  + an actual [database] or a recent dump by Michael (mchlgade@gmail.com) 
+  + an actual [database] or a recent dump by Michael (mchlgade@pm.me) 
   
 ## License Terms
 
