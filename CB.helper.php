@@ -62,34 +62,6 @@ function CBgetpagetitle()
 
 // ============================================================================
 
-function RMLgetplayername( $id )
-{
-	if( $id == 0 ) {
-		return "Players";
-	}
-	if ( $result = CBfireSQL( "SELECT name FROM player WHERE id=$id" ) ) {
-		$thisrow = pg_Fetch_Object( $result, 0 );
-		return $thisrow->name;
-	} else {
-		return 'Invalid Player ID: '.$id;
-	}
-}
-
-// ============================================================================
-
-function CBgetgametitle( $id, $print_on = false )
-{
-	$result = CBfiresql("SELECT white, black FROM game WHERE id=$id");
-	if( !( $thisrow = pg_Fetch_Object( $result, 0 ) ) ){
-		$out = 'ERROR: No Title for Game ID.';
-	} else {
-		$out = $thisrow->white . ' vs. ' . $thisrow->black;
-	}
-	return $out;
-}
-
-// ============================================================================
-
 function CBfixdate( $date, $f = 'DD MMM YYYY' )
 {
 	setTimeZone();
@@ -107,190 +79,12 @@ function CBfixdate( $date, $f = 'DD MMM YYYY' )
 
 // ============================================================================
 
-function CBgetplayerid($player)
-{
-	$result = CBfiresql( "SELECT id FROM player WHERE name='$player'" );
-	if( pg_numrows( $result ) > 0 ) {
-		$tmp = pg_Fetch_Object( $result );
-		$result = $tmp->id;
-	} else {
-		$result = CBcreateplayer( $player );
-	}
-	return $result;
-}
-
-// ============================================================================
-
-function CBcreateplayer( $player )
-{
-	$user = CBgetcurrentuser();
-
-	RMLfiresql( "INSERT INTO player (id,name,maintainer) values(DEFAULT,'$player','$user')" );
-	return $authorid;
-}
-
-// ============================================================================
-
 function CBcreatenewplayer()
 {
 	global $player, $club, $fideid;
 
 	CBfiresql("INSERT INTO player (id, player, club, fideid) values(DEFAULT,'$player','$club','$fideid')");	
 	return true;
-}
-
-// ============================================================================
-
-function CBaddnews( $print_on = true )
-{
-	if( ! hasRights( 'addnews' ) ) {
-		$out = "ERROR: in Add News, you have no right to do this.";
-		return false;
-	} else {
-		$author = RMLgetcurrentuser();
-		$out = "\n".'<p class="ParaNoIndent">Hello '.$author.'<br/>
-Please keep news to something that is actually news. Other than that, go nuts...<br/>
-&nbsp;</p>
-<form method="post" action="?news=save"><table class="form">
-<tr><td valign="top">Headline : </td><td><input type="text" name="headline" size="60"></td></tr>
-<tr><td valign="top">Body : </td><td><textarea class="norm" rows="10" cols="41" wrap="none" name="body"></textarea></td></tr>
-<tr><td></td><td><input type="submit" value="Post news"></td></tr></table>
-<input type="hidden" name="news" value="save"></form>';
-	}
-	return out;
-}
-
-// ============================================================================
-
-function CBsavenews( $print_on = true )
-{
-	global $body, $headline;
-
-	$out = '';
-	if( ! hasRights( 'addnews' ) ) {
-		$out = "ERROR: News Save : Cookie baaaaaaaad...";
-	} else {
-
-		$author = CBgetcurrentuser();
-
-		CBfiresql("INSERT INTO news (id,headline,body,author,posted) VALUES(DEFAULT,'$headline','$body','$author',NOW())");
-	}
-	return $out;
-}
-
-// ============================================================================
-
-function CBdeletenews( $id, $print_on = true )
-{
-	$sql = CBfiresql("SELECT author FROM news WHERE id=$id");
-	$thisrow = pg_Fetch_Object($sql,0);
-
-	$thisauthor = $thisrow->author;
-	if( ! hasRights( 'delnews', array( $thisauthor ) ) ) {
-		$out = 'ERROR: No Rights to delte news';
-	} else {
-		CBfiresql("DELETE FROM news WHERE id=$id");
-	}
-	return $out;
-}
-
-// ============================================================================
-
-function CBeditnews( $id, $print_on = true )
-{
-	$out = '';
-	if( ! hasRights( 'editnews' ) ) {
-		$out = "ERROR : No rights for you.";
-	} else {
-		if( ! hasRights( 'test' ) ) {
-			$out = 'No code in function yet.';
-		} else {
-			//id,headline,body,author,posted
-			$sql = CBfiresql("SELECT * FROM news WHERE id=$id");
-			$thisrow = pg_Fetch_Object($sql,0);
-			$cu = CBgetcurrentuser();
-			$out = "\n".'<p class="ParaNoIndent">Hello ' .$cu .'<br/>
-Please keep news to something that is actually news. Other than that, go nuts...<br/>
-&nbsp;</p>
-<form method="post" action="?news=update&id='.$id.'"><table class="form">
-<tr><td valign="top">Headline : </td><td><input type="text" name="headline" size="60" value="'.$thisrow->headline.'"></td></tr>
-<tr><td valign="top">Body : </td><td><textarea class="norm" rows="10" cols="41" wrap="none" name="body">'.$thisrow->body.'</textarea></td></tr>
-<tr><td></td><td><input type="submit" value="Save news"></td></tr></table>
-<input type="hidden" name="news" value="save"></form>'
-			;
-		}
-	}
-	return $out;
-}
-
-// ============================================================================
-
-function CBupdatenews( $print_on = true )
-{
-	$out = '';
-	if( ! hasRights( 'editnews' ) ) {
-		$out = "ERROR : No rights for you.";
-	}
-	if( ! hasRights( 'test' ) ) {
-		$out = 'ERROR: No code in function yet.';
-	}
-	CBfiresql("UPDATE news SET headline='".$headline."', body='".$body."' WHERE id='$id'");
-	return $out;
-}
-
-// ============================================================================
-
-function CBgetrating( $number ) {
-	if( $number > 1336 ) return "Elite";
-	if( $number > 750 ) return "Jedi Master";
-	if( $number > 500 ) return "Jedi";
-	if( $number > 250 ) return "Zen Master";
-	if( $number > 100 ) return "Master";
-	if( $number > 75 ) return "Expert";
-	if( $number > 50 ) return "Adept";
-	if( $number > 25 ) return "Apprentice";
-	if( $number > 10 ) return "Novice";
-	if( $number > 5 ) return "Amateur";
-	if( $number > 1 ) return "Mostly Harmless";
-	return "Harmless";
-}
-
-// ============================================================================
-
-function CBgeneraterss($print_on = true)
-{
-	$out = '<?xml version="1.0" encoding="UTF-8" ?>';
-	$out .= '<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">';
-	$out .= '<channel>';
-	$out .= '<title>Chess For the Win</title>';
-	$out .= '<link>http://valbyskakklub.dk</link>';
-	$out .= '<image>';
-	$out .= '<url>./img/logo.png</url>';
-	$out .= '<link>http://valbyskakklub.dk</link>';
-	$out .= '</image>';
-	$out .= '<description>All Your Games Are Belong To Us !!!</description>';
-	
-	$sql = CBfiresql("SELECT id,title,player_id,teaser,posted_on FROM document WHERE status > 2 ORDER BY posted_on DESC LIMIT 20");
-	for($row=0;$row<pg_numrows($sql);$row++) {
-		$thisrow = pg_Fetch_Object($sql,$row);
-		$thisid = $thisrow->id;
-		$thistitle = $thisrow->title;
-		$thissubtitle = $thisrow->subtitle;
-		$thisplayer = CBgetplayername($thisrow->player_id);
-		$thisteaser = strip_tags($thisrow->teaser);
-		$thisdate = $thisrow->posted_on;
-	
-		$out .= '<item>';
-		$out .= '<title>'.$thistitle.' - '.$thisauthor.'</title>';
-		$out .= '<link>http://ncjeamtnv4vpao5cop2lgezdyemopk3bwvzigv2zry4bw2qk6va3e2yd.onion/?document=view&amp;id='.$thisid.'</link>';
-		$out .= '<description>'."\n".$thisteaser.'</description>';
-		$out .= '<pubDate>'.$thisdate.'</pubDate>';
-		$out .= '</item>';
-	}	
-	
-	$out .= '</channel>';
-	$out .= '</rss>';
-	return $out;
 }
 
 // ============================================================================
@@ -398,26 +192,6 @@ function del_dir( $dirname, $delim='/' )
 	return del_dir( $dirname );
 }
 
-// ============================================================================
-
-function CBaddtofavourite( $gameid ) {
-	$user = CBgetuserid(CBgetcurrentuser());
-	if($user && $gameid) {
-		RMLfiresql("INSERT INTO favourite VALUES($user,$gameid)");
-	}
-}
-
-// ============================================================================
-
-/* ewa: optimization, displaying level/rating might be changed here centrally
- * formatting/alignment should be done in style best as a class or a container calling this */
-function getRatingDisplay( $score, $styleclass='rating-elm', $max = 10, $round = 0 )
-{
-	$score = round( $score, 0 );
-	return str_repeat ( '<img class="'.$styleclass.'" alt="On" src="./img/on.png"/>', $score )
-	. str_repeat ( '<img class="'.$styleclass.'" alt="Off" src="./img/off.png"/>', ( $max - $score ) );
-}
-
 /* put timezone in a central point, could be configured in a setting via DB or config file as well
  * */
 function setTimeZone( $z = 'Europe/Copenhagen' )
@@ -425,5 +199,4 @@ function setTimeZone( $z = 'Europe/Copenhagen' )
 	// idea: e.g. if $z == '' load config file
 	return date_default_timezone_set( $z );
 }
-
 

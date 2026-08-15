@@ -18,14 +18,13 @@ error_reporting(E_ALL ^E_NOTICE ^E_DEPRECATED);
 //error_reporting(E_ALL ^E_STRICT);
 ini_set('display_errors', '1');
 
-$pagename = "Partier fra Valby Skakklub";
+$pagename = "Valby Skakklub";
 
 require 'settings.php';
 require 'CB.common.php';
 require 'CB.database.php';
 require 'CB.helper.php';
 require 'CB.user.php';
-require 'CB.forum.php';
 require 'CB.chess.php';
 
 $id = 0;
@@ -38,10 +37,10 @@ $step = 0;
 $currentmap = '<map name="workmap">';
 $flip = 0;
 
-$notationknight = 'N';
-$notationbishop = 'B';
-$notationrook = 'R';
-$notationqueen = 'Q';
+$notationknight = 'S';
+$notationbishop = 'L';
+$notationrook = 'T';
+$notationqueen = 'D';
 $notationking = 'K';
 
 $currentposition = $startposition;
@@ -57,6 +56,7 @@ if (isset($_REQUEST['select'])) $select = $_REQUEST['select'];
 if (isset($_REQUEST['player'])) $player = $_REQUEST['player'];
 if (isset($_REQUEST['club'])) $club = $_REQUEST['club'];
 if (isset($_REQUEST['fideid'])) $fideid = $_REQUEST['fideid'];
+if (isset($_REQUEST['game'])) $game = $_REQUEST['game'];
 
 $maxstep = count(explode(' ', $currentgame));
 $currentpgn = CBgetsan($currentgame);
@@ -88,14 +88,14 @@ switch( $function ) {
 	break;
 	case 'logout':
 		CBlogout();
-		header("Location: ./index.php");
+		header("Location: .");
 	break;
 	case 'newuser':
 		CBcreatenewuser();
 	break;
 	case 'newplayer':
 		CBcreatenewplayer();
-		header("Location: ./index.php?function=members");
+		header("Location: .?function=members");
 	break;
 }
 

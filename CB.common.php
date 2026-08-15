@@ -47,28 +47,23 @@ function CBMenuButton( $btntile, $href = "", $class = "", $decoration = 'star' )
 
 // ============================================================================
 
-function CBdisplaymenu( )
-{
+function CBdisplaymenu( ) {
 	global $function;
+	global $game;
 	
 	$currentuser = CBgetcurrentuser();
-	$out = "<!-- MENU START --><div class=\"menu\">&nbsp;&nbsp;";
-	$out .= '<img class="logo" src="img/logo.png" />';
-	if($function == "") {
-		$out .= "\n\n".'<a class="activebutton home" href="./index.php">Hjem</a>';
+	$out = "<!-- MENU START --><div class=\"menu\">&nbsp;";
+	$out .= '<img class="logo" src="img/logo.svg"/>';
+	if(($function == "") && ($game <> 'new')) {
+		$out .= "\n\n".'<a class="activebutton home" href=".">Nyheder</a>';
 	} else {
-		$out .= "\n\n".'<a class="button home" href="./index.php">Hjem</a>';
+		$out .= "\n\n".'<a class="button home" href=".">Nyheder</a>';
 	}
 
 	if($function == 'members' || $function == 'addmember') {
-		$out .= "\n<a class=\"activebutton spark\" href=\"?function=members\">Spillere</a>";
+		$out .= "\n<a class=\"activebutton spark\" href=\"?function=members\">Medlemmer</a>";
 	} else {
-		$out .= "\n<a class=\"button spark\" href=\"?function=members\">Spillere</a>";
-	}
-	if($function == 'tournaments') {
-		$out .= "\n<a class=\"activebutton spark\" href=\"?function=tournaments\">Turneringer</a>";
-	} else {
-		$out .= "\n<a class=\"button spark\" href=\"?function=tournaments\">Turneringer</a>";
+		$out .= "\n<a class=\"button spark\" href=\"?function=members\">Medlemmer</a>";
 	}
 	
 	if($function == 'games') {
@@ -79,7 +74,7 @@ function CBdisplaymenu( )
 	
 	if($currentuser) {
 		$title = CBgetuserhandle(CBgetcurrentuserID());
-		if($function == 'user') {
+		if(($function == 'user') || ($game == 'new')) {
 			$out .= "\n<a class=\"activebutton email\" href=\"?function=user\">" . $title . "</a>";
 		} else {
 			$out .= "\n<a class=\"button email\" href=\"?function=user\">" . $title . "</a>";
@@ -94,8 +89,6 @@ function CBdisplaymenu( )
 		$out .= "\n<a class=\"activebutton next\" href=\"?function=login\">Login</a>";
 	}
 
-	$out .= "\n<div class=\"inlineclear\"></div>";
-
 	return $out;
 }
 
@@ -103,6 +96,7 @@ function CBdisplaymenu( )
 
 function CBdisplaymain( $id ) {
 	global $function;
+	global $game;
 
 	$out = "\n\n".'<!-- MAIN START -->'."\n\n".'<div class="main">';
 
@@ -127,10 +121,6 @@ function CBdisplaymain( $id ) {
 		$out .= CBdisplaymembers();
 		$frontpage = false;
 	break;
-	case 'tournaments':
-		$out .= CBdisplaytournaments();
-		$frontpage = false;
-	break;
 	case 'games':
 		$out .= CBdisplaygames();
 		$frontpage = false;
@@ -138,6 +128,15 @@ function CBdisplaymain( $id ) {
 	case 'addmember':
 		$out .= CBdisplayaddmember();
 		$frontpage = false;
+	}
+	
+	// ======================================
+	
+	switch ($game) {
+	case 'new':
+		$out .= CBdisplaynewgame();
+		$frontpage = false;
+	
 	}
 	
 	// ======================================
@@ -170,6 +169,7 @@ function CBdisplayend( )
 
 function CBdisplaytitle( ) {
 	global $function;
+	global $game;
 	global $pagename;
 	global $id;
 	global $currentposition;
@@ -178,7 +178,7 @@ function CBdisplaytitle( ) {
 	global $currentdate;
 
 	//default
-	$title = "~ " . $pagename . " ~";
+	$title = $pagename;
 
 	$out = '<p class="pagetitle">';
 
@@ -190,19 +190,22 @@ function CBdisplaytitle( ) {
 		$title = CBgetuserhandle(CBgetcurrentuserID());
 	break;
 	case 'members':
-		$title = 'Spillere';
+		$title = 'Medlemmer';
 	break;
 	case 'addmember':
 		$title = 'Tilføj Spiller';
 	break;
-	case 'tournaments':
-		$title = 'Turneringer';
-	break;
 	case 'games':
-		$title = $currenttournament.'<small>  ('.$currentround.'. runde, '. $currentdate . ')</small>';
+		$title = $currenttournament;
 	break;
 	}
 
+	switch($game) {
+	case 'new':
+		$title = 'Tilføj Parti';
+	break;
+	}
+	
 	$out .= $title .'</p></div>';
 	return $out;
 }
@@ -211,8 +214,8 @@ function CBdisplaytitle( ) {
 
 function CBdisplayfrontpage( ) {
 	$user = CBgetcurrentuser();
-	
-	$out = "\n<div class=\"box\"><div class=\"boxheader\"><b>Nyheder</b></div><div class=\"boxtext\">Nyheder fra Valby Skakklub ... tilgår.</div></div>";
+	$out = "\n<div class=\"box\"><div class=\"boxheader\"><b>Nyheder</b></div>";
+	$out .= "\n<div class=\"boxtext\">Nyheder fra Valby Skakklub ... tilgår.</div></div>";
 
 	if($user <> '') {
 		$out .= "\n<p class=\"boxtext\"><a class=\"button add\" href=\"?function=addnews\">Add News</a></p></div>";
@@ -224,9 +227,10 @@ function CBdisplayfrontpage( ) {
 
 function CBdisplaymembers() {
 	$user = CBgetcurrentuser();
+	
 	$out = "\n<div class=\"box\"><div class=\"boxheader\"><b>Valby Skakklub</b></div>";
-
-	$result = CBfiresql("SELECT id,player,club,fideid FROM player WHERE club='Valby Skakklub' ORDER BY fideid");
+		
+	$result = CBfiresql("SELECT id,player,club,fideid FROM player WHERE club='Valby Skakklub' ORDER BY player");
 	
 	for( $row=0; $row < pg_numrows( $result ); $row++ ) {
 		$thisrow = pg_Fetch_Object( $result, $row );
@@ -238,11 +242,11 @@ function CBdisplaymembers() {
 		$out .= "\n".'<div class="boxtext"><a class="move" href="https://ratings.fide.com/profile/'.$fideid.'">'.$fideid.'</a> : <b><a class="move" href="./?function=members&id='.$thisid.'">'.$thisplayer.'</a></b></div>';
 				
 	}
-	$out .= "</div>";
+	$out .= "\n</div>";
 	
-	$out .= "\n<div class=\"box\"><div class=\"boxheader\"><b>Andre Spillere</b></div>";
+	$out .= "\n<div class=\"box\"><div class=\"boxheader\"><b>Andre Klubber</b></div>";
 
-	$result = CBfiresql("SELECT id,player,club,fideid FROM player WHERE club<>'Valby Skakklub' ORDER BY fideid");
+	$result = CBfiresql("SELECT id,player,club,fideid FROM player WHERE club<>'Valby Skakklub' ORDER BY player");
 	
 	for( $row=0; $row < pg_numrows( $result ); $row++ ) {
 		$thisrow = pg_Fetch_Object( $result, $row );
@@ -253,22 +257,10 @@ function CBdisplaymembers() {
 		
 		$out .= "\n".'<div class="boxtext"><a class="move" href="https://ratings.fide.com/profile/'.$fideid.'">'.$fideid.'</a> : <b><a class="move" href="./?function=members&id='.$thisid.'">'.$thisplayer.'</a></b> : '. $thisclub .'</div>';		
 	}
-	$out .= "</div>";
+	$out .= "\n</div>";
 	
 	if($user <> '') {
 		$out .= "\n<p class=\"boxtext\"><a class=\"button add\" href=\"?function=addmember\">Add Member</a></p>";
-	}
-	return $out;
-}
-
-// ============================================================================
-
-function CBdisplaytournaments() {
-	$user = CBgetcurrentuser();
-	
-	$out = "\n<div class=\"box\"><div class=\"boxheader\"><b>Turneringer</b></div><div class=\"boxtext\">Vi har ingen turneringer, spil noget Ludo.  </div></div>";
-	if($user <> '') {
-		$out .= "\n<p class=\"boxtext\"><a class=\"button add\" href=\"?function=addtournament\">Add Tournament</a></p>";
 	}
 	return $out;
 }
@@ -286,7 +278,7 @@ function CBdisplaygames() {
 	global $castleimg;
 	global $maxstep;
 	global $map;
-	global $boardsize;
+	global $fieldsize;
 	global $flip;
 	global $dark;
 	global $lite;
@@ -300,60 +292,49 @@ function CBdisplaygames() {
 	global $blackname;
 	global $blackelo;
 	global $blackclub;
-
+	
 	// output currentposition as image
 	ob_start();
-        CBdisplayboard($currentposition,$boardsize,$flip,$dark,$lite);
+        CBdisplayboard($currentposition,$fieldsize*8,$flip,$dark,$lite);
         $raw = ob_get_clean();
         $out .= '<img class="chessboard" src="data:image/png;base64,' 
         . base64_encode( $raw ) 
         . '" usemap="#workmap"/>';
         $out .= $currentmap;
 
-	$out .= "\n<table style=\"height:".$boardsize."px;margin:0;padding:0\">";
+	$out .= "\n<table style=\"height:".($fieldsize*8)."px;margin:0;padding:0\">";
 	if($flip) {
-		$out .= '<tr style="height:'.($boardsize/8).'px;margin:0;padding:0"><td><div class="playernames"><b>'.$whitename.'</b></div>&nbsp;&nbsp; ('.$whiteelo.') <b>'.$whiteclub.'</b></td></tr>';
+		$out .= "\n" . '<tr style="height:'.$fieldsize.'px;margin:0;padding:0"><td><div class="playernames"><b>'.$whitename.'</b></div>&nbsp;&nbsp; ('.$whiteelo.') <b>'.$whiteclub.'</b></td></tr>';
 	} else {
-		$out .= '<tr style="height:'.($boardsize/8).'px;margin:0;padding:0"><td><div class="playernames"><b>'.$blackname.'</b></div>&nbsp;&nbsp; ('.$blackelo.') <b>'.$blackclub.'</b></td></tr>';
+		$out .= "\n" . '<tr style="height:'.$fieldsize.'px;margin:0;padding:0"><td><div class="playernames"><b>'.$blackname.'</b></div>&nbsp;&nbsp; ('.$blackelo.') <b>'.$blackclub.'</b></td></tr>';
 	}
 	
-	$out .= '<tr><td><div class="moves">' . $currentpgn . '</div></td></tr>';
+	$out .= '<tr><td>'. "\n" . '<div class="moves">' . $currentpgn . '</div></td></tr>';
 	
 	if($flip) {
-		$out .= '<tr style="height:'.($boardsize/8).'px;margin:0;padding:0"><td><div class="playernames"><b>'.$blackname.'</b></div>&nbsp;&nbsp; ('.$blackelo.') <b>'.$blackclub.'</b></td></tr>';
+		$out .= "\n" . '<tr style="height:'.($fieldsize).'px;margin:0;padding:0"><td><div class="playernames"><b>'.$blackname.'</b></div>&nbsp;&nbsp; ('.$blackelo.') <b>'.$blackclub.'</b></td></tr>';
 	} else {
-		$out .= '<tr style="height:'.($boardsize/8).'px;margin:0;padding:0"><td><div class="playernames"><b>'.$whitename.'</b></div>&nbsp;&nbsp; ('.$whiteelo.') <b>'.$whiteclub.'</b></td></tr>';
+		$out .= "\n" . '<tr style="height:'.($fieldsize).'px;margin:0;padding:0"><td><div class="playernames"><b>'.$whitename.'</b></div>&nbsp;&nbsp; ('.$whiteelo.') <b>'.$whiteclub.'</b></td></tr>';
 	}
 	$out .= "\n</table>";
 	
-	$out .= '<div class="inlineclear"/>';
+	$out .= "\n" . '<div class="inlineclear"/>';
 	if($step > 0) {
-		$out .= '<a class="button prev" href="?function=games&flip='.$flip.'&step=' .($step - 1). '">Prev</a>';
-	} 
-	if($flip) {
-		$out .= ' <a class="button" href="?function=games&flip=0&step='.$step.'">Flip</a> ';
+		$out .= "\n" . '<a class="button prev" href="?function=games&flip='.$flip.'&step=' .($step - 1). '">Prev</a>';
 	} else {
-		$out .= ' <a class="button" href="?function=games&flip=1&step='.$step.'">Flip</a> ';
+		$out .= "\n" . '<a class="button prev" href="?function=games&flip='.$flip.'&step=0">Prev</a>';
+	}
+	if($flip) {
+		$out .= "\n" . '<a class="button" href="?function=games&flip=0&step='.$step.'">Flip</a> ';
+	} else {
+		$out .= "\n" . '<a class="button" href="?function=games&flip=1&step='.$step.'">Flip</a> ';
 	}
 	if($step < $maxstep) {
-		$out .= '<a class="button next" href="?function=games&flip='.$flip.'&step=' .($step + 1). '">Next</a>';
+		$out .= "\n" . '<a class="button next" href="?function=games&flip='.$flip.'&step=' .($step + 1). '">Next</a>';
 	}
 	
-	$out .= '</div>';
-
+	$out .= "\n" . '</div>';
 	
-	$out .= '<p class="BoxText" style="text-align:center">';
-
-	$result = CBfiresql("SELECT id FROM game WHERE status=3 ORDER BY posted_on DESC LIMIT 20");
-	for($row=0;$row<pg_numrows($result);$row++) {
-		$thisrow = pg_Fetch_Object($result,$row);
-		$thisid = $thisrow->id;
-
-		$out .= "\n<a href=\"?game=view&amp;id=$thisid\">
-<img class=\"FrontCover\" alt=\"Cover\" src=\"./covers/cover$thisid\" /></a>";
-	}
-	$out .= "\n</p>";
-
 	return $out;
 }
 
@@ -371,202 +352,32 @@ function CBdisplayaddmember() {
 
 // ============================================================================
 
-function CBdisplaynews() {
-
-}
-
-// ============================================================================
-
-function CBgetlatestcomment( $print_on = true ) {
-	$result = CBfiresql("SELECT author,body,level,thread_id,posted_on FROM forum WHERE level > 0 ORDER BY posted_on DESC LIMIT 1");
-	$thisrow = pg_Fetch_Object($result,0);
-	$thishandle = $thisrow->author;
-	$thisuserID = CBgetuserID( $thishandle );
-	$thisbody = nl2br($thisrow->body);
-	$thisrating = $thisrow->level;
-	$thisgame = $thisrow->thread_id;
-	$thisdate = CBfixdate($thisrow->posted_on);
+function CBdisplaynewgame() {
+	$now = date_create('now')->format('Y-m-d H:i:s');
+	$dato = CBfixdate($now);
 	
-	if( !file_exists( './players/'.$thisuserID.'.png' ) ) {
-		$image = 'Anonymous';
-	} else {
-		$image = $thisuserID;
-	}
+	$result = CBfiresql("SELECT player,fideid FROM player ORDER BY player");
+	$whiteplayer = '<option value="0">-- Select White Player --</option>';
+	$blackplayer = '<option value="0">-- Select Black Player --</option>';
+	for($row=0;$row<pg_numrows($result);$row++) {
+		$thisrow = pg_Fetch_Object($result,$row);
+		$thisplayer = $thisrow->player;
+		$thisfide = $thisrow->fideid;
+		$whiteplayer .= "\n".'<option value="'.$thisfide.'">'.$thisplayer.'</option>';
+		$blackplayer .= "\n".'<option value="'.$thisfide.'">'.$thisplayer.'</option>';
+	}	
 	
-	$result = "<div class=\"box\"><div class=\"boxheader\"><a href=\"?game=view&amp;id=$this\"><img class=\"FrontCover\" style=\"float : right;margin : 0;margin-left : 10px;margin-bottom : 5px\" src=\"./covers/cover$thisdocument\" /></a><img class=\"docicon\" src=\"./users/$image.png\" /> &nbsp;" . getRatingDisplay($thisrating) . "</div><div class=\"boxtext\"><sup>Added by : <b>$thishandle</b> (<i>$thisdate</i>)</sup><br />$thisbody</div><div class=\"inlineclear\"></div></div>";
-	return $result;
-}
+	$out = "\n" . '<div class="box"><div class="boxheader"><b>Add game</b></div>' . '<table><form method="post" action="?function=newgame"><fieldset>
+<tr><td>White</td><td> : <select class="norm" name="white">'.$whiteplayer.'</select></td>
+<td> Rating</td><td> : <input type="text" size="5" name="whiterating"/></td></tr>
+<tr><td>Black</td><td> : <select class="norm" name="black">'.$blackplayer.'</select></td>
+<td> Rating</td><td> : <input type="text" size="5" name="blackrating"/></td></tr>
+<tr><td>Tournament</td><td colspan=3> : <input type="text" size="50" name="tournament"/></td></tr>
+<tr><td>Round</td><td> : <input type="text" size="10" name="round"/></td></tr>
+<tr><td>Date</td><td> : <input type="text" size="10" name="date" value="'.$dato.'"/></td></tr>
 
-// ============================================================================
-
-function CBdisplay( $text , $type, $print_on = true ) {
-	$out = '';
-	switch($type) {
-	case '0':
-		$out .= "\n<p class=\"Error\">$text</p>";
-	break;
-	case '1':
-		$out .= "\n<p class=\"Head1\">$text</p>";
-	break;
-	case '2':
-		$out .= "\n<p class=\"Head2\">$text</p>";
-	break;
-	case '3':
-		$out .= "\n<p class=\"Head3\">$text</p>";
-	break;
-	case '4':
-		$out .= "\n<p class=\"ParaIndent\">$text</p>";
-	break;
-	case '5':
-		$out .= "\n<p class=\"ParaBlankOver\">$text</p>";
-	break;
-	case '6':
-		$out .= "\n<p class=\"QuoteIndent\">$text</p>";
-	break;
-	case '7':
-		$out .= "\n<p class=\"QuoteBlankOver\">$text</p>";
-	break;
-	case '8':
-		$out .= "\n<p class=\"ParaNoIndent\">$text</p>";
-	break;
-	case '9':
-		$out .= "\n<p class=\"QuoteNoIndent\">$text</p>";
-	break;
-	case '17':
-		$out .= "\n<p class=\"PreBlankOver\">$text</p>";
-	break;
-	case '18':
-		$out .= "\n<p class=\"PreNoIndent\">$text</p>";
-	break;
-	case '20':
-		$out .= "\n<p class=\"Picture\">$text</p>";
-	break;
-	case '21':
-		$out .= "\n<table class=\"main\">\n<tr>\n<td>$text</td>";
-	break;
-	case '22':
-		$out .= "\n<td>$text</td>";
-	break;
-	case '23':
-		$out .= "</tr>\n<tr>\n<td>$text</td>";
-	break;
-	case '24':
-		$out .= "\n<td>$text</td>\n</tr>\n</table>";
-	break;
-	case '25':
-		$out .= "\n<ul><li>$text";
-	break;
-	case '26':
-		$out .= "</li>\n<li>$text";
-	break;
-	case '27':
-		$out .= "</li>\n<li>$text</li></ul>";
-	break;
-	case '28':
-		$out .= "\n<ol><li>$text";
-	break;
-	case '29':
-		$out .= "</li>\n<li>$text";
-	break;
-	case '30':
-		$out .= "</li>\n<li>$text</li></ol>";
-	break;
-	case '31':
-		$out .= "\n<p class=\"HangingBlankOver\">$text</p>";
-	break;
-	case '32':
-		$out .= "\n<p class=\"HangingIndent\">$text</p>";
-	break;
-	case '33':
-		$out .= "\n<p class=\"ParaVignet\">$text</p>";
-	break;
-	case '34':
-		$out .= "\n<div class=\"BoxStart\">";
-	break;
-	case '35':
-		$out .= "\n</div>";
-	break;
-	case '36':
-		$out .= "\n<p class=\"BoxHead\">$text</p>";
-	break;
-	}
-	return $out;
-}
-
-
-// ============================================================================
-
-function CBdisplaymanual( $print_on = true )
-{
-	setTimeZone();
-	$out = '';
-	CBdisplay( 'A helpful documentation for all of you that are willing to rise from ordinary Reader to Librarian or are eager to know sligtly more about this place and how it works.', 8, false );
-	return $out;
-}
-
-// ============================================================================
-
-function CBdisplayusers( $print_on = true )
-{
-	$result = CBfiresql("SELECT id,user_name,karma,irc,xmpp,diaspora,mastodon,ricochet FROM \"user\" WHERE karma > 1 ORDER BY karma DESC");
-	
-	for( $row=0; $row < pg_numrows( $result ); $row++ ) {
-		$thisrow = pg_Fetch_Object( $result, $row );
-		$thisid = $thisrow->id;	
-		$thisusername = $thisrow->user_name;
-		$thiskarma = $thisrow->karma;
-		$thiskarma = '(' . CBgetrating($thiskarma) . ')';
-		$diaspora = $thisrow->diaspora;
-		$mastodon = $thisrow->mastodon;
-		$xmpp = $thisrow->xmpp;
-		$irc = $thisrow->irc;
-		$ricochet = $thisrow->ricochet;
-		
-		$out .= "\n".'<div class="boxheader"><b><a href="./?function=user&id='.$thisid.'">'.$thisusername.'</a></b> '.$thiskarma.'</div><div class="boxtext"><small>';
-		
-		if(file_exists("./users/".$thisid.".png")) {	
-			$out .= "<img style=\"float:left\" src=\"./users/".$thisid.".png\">";
-		} else {
-			$out .= "<img style=\"float:left\" src=\"./users/Anonymous.png\">";
-		}
-				
-		if($xmpp) $out .= "<b>XMPP</b>&nbsp;:&nbsp;$xmpp ";
-		if($irc) $out .= "<br/><b>IRC</b>&nbsp;:&nbsp;$irc ";
-		if($diaspora) $out .= "<br/><b>Diaspora*</b>&nbsp;:&nbsp;$diaspora ";
-		if($mastodon) $out .= "<br/><b>Mastodon</b>&nbsp;:&nbsp;$mastodon ";
-		if($ricochet) $out .= "<br/><b>Ricochet</b>&nbsp;:&nbsp;$ricochet ";
-		$out .= "</small></div><div class=\"inlineclear\"> </div>";		
-	}
-	return $out;
-}
-
-// ============================================================================
-
-function CBdisplayplayers( $print_on = true )
-{
-	$out = '';
-	$sql = CBfiresql( "SELECT DISTINCT(handle) AS owner, COUNT(handle) AS docs, MIN(posted_on) AS first, MAX(posted_on) AS last FROM game WHERE status=3 GROUP BY owner ORDER BY docs DESC, first DESC" );
-	for( $row=0; $row < pg_numrows( $sql ); $row++ ) {
-		$thisrow = pg_Fetch_Object( $sql, $row );
-		$thisuser = $thisrow->owner;
-		$thisuserID = CBgetuserID( $thisuser );
-		$numdocs = CBgetrating( $thisrow->docs );
-		$daysactive = abs((strtotime($thisrow->last) - strtotime($thisrow->first)) / (60*60*24)) + 1;
-		// +1 because from today to today is 1 day and not 0
-		// avoids division by zero on users active for just 1 day (Michael)
-		$gamesperweek = getNumberFormatted( ($thisrow->docs / $daysactive)*7 ,1);
-
-		if( !file_exists( './users/'.$thisuserID.'.png' ) ) {
-			$image = 'Anonymous';
-		} else {
-			$image = $thisuserID;
-		}
-
-		$out .= "\n".'<div class="librarian box">
-<div class="boxheader"><img class="docicon" src="./users/'.$image.'.png" /><b>'.$thisuser.'</b> ('.$numdocs.')</div>
-<div class="boxtext">Added <b>' .$thisrow->docs .'</b> games between <b>' .CBfixdate( $thisrow->first ) .'</b> and <b>' .CBfixdate( $thisrow->last ) .'</b> (~<b>' .$gamesperweek .'</b>&nbsp;games/week)</div><div class="inlineclear"></div></div>';
-
-	}
+<tr><td colspan=3></td><td><input class="formbutton" type="submit" value=" Add Game "/></td></tr>
+</fieldset></form></table></div></div>';
 	return $out;
 }
 
@@ -588,13 +399,3 @@ function getNumberFormatted( $n, $decplaces = 2, $decsep = '.', $tsdsep = ',' ) 
 	return $n;
 }
 
-// ============================================================================
-
-function checkSettings( $settingsFilename ) {
-  if (! is_readable( $settingsFilename ) ) {
-      die('ERROR: Configuration in settings.php not readable or missing!');
-  }
-// todo: more tests on settings
-// e.g. check if salt is set properly, if not die('settings: need the salt to be set properly')
-// if (empty($secret_salt)) { die('ERROR: Setting: need salt to be set properly. Current value:'.$secret_salt); }
-}

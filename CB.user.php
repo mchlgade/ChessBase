@@ -1,5 +1,4 @@
 <?php
-
 // ============================================================================
 //  User functions for ChessBase
 //  Copyright (C) Michael Gade
@@ -72,23 +71,6 @@ function CBgetcurrentuser()
 
 // ============================================================================
 
-function CBgetkarma($userhandle) {
-	if($userhandle == '') return 0;
-	
-	$result = CBfiresql("SELECT karma FROM \"user\" WHERE handle='$userhandle'");
-	$thisrow = pg_Fetch_Object( $result, 0 );
-	return $thisrow->karma;
-}
-
-// ============================================================================
-
-function CBgivekarma($userid) {
-	if($userid == '') return 0;
-	$result = RMLfiresql("UPDATE \"user\" SET karma=karma+1 WHERE id='$userid' AND karma < 1337");
-}
-
-// ============================================================================
-
 function CBlogin()
 {
 	global $pass1, $pass2;
@@ -134,7 +116,7 @@ function CBdisplaysignup( ) {
 <tr><td>Login </td><td>: <input type="password" size="40" name="pass1" /></td></tr>
 <tr><td>Logon </td><td>: <input type="password" size="40" name="pass2" /></td></tr>
 <tr><td></td><td><input class="formbutton" type="submit" value="Turn On" /></td></tr>
-</fieldset></form></table></div></div>'
+</fieldset></form></table></div>'
 
 .'<div class="box"><div class="boxheader"><b>Sign Up</b></div>
 <div class="boxtext">'."We take great pride in not knowing who our users are, so please don't use any identifying information to log on. This is NOT your 'username' and 'password', it's just two words used to identify you. (Hint: Use a password manager).<br><br><b>NOBODY WILL EVER CONTACT YOU ABOUT THIS FOR ANY REASON.</b><br><br><big><b>It is impossible to restore lost accounts.</b></big>".'
@@ -195,26 +177,6 @@ function CBdisplayuserpage( ) {
 	$out .= "<div class=\"inlineclear\"> </div>"
 	.CBdisplaymygames( )
 	.CBdisplaymessages( );
-	return $out;
-}
-
-// ============================================================================
-
-function CBdisplayfavourites( $user_id = 0 )
-{
-	if($user_id == 0) { return; }
-	
-	$result = CBfiresql("SELECT game_id FROM favourite WHERE user_id=$user_id");
-
-	$out = "\n".'<div class="box">
-<div class="boxheader"><b>Favourite games</b></div>
-<div class="boxtext">';
-	for( $row=0; $row < pg_numrows( $result ); $row++ ) {
-		$thisrow = pg_Fetch_Object( $result, $row );
-		$id = $thisrow->game_id;
-		$out .= '<a href="?document=view&amp;id='.$id.'"><img class="FrontCover" src="./covers/cover'.$id.'"/></a>';
-	}
-	$out .= '</div></div>';
 	return $out;
 }
 
@@ -291,163 +253,6 @@ function CBdisplaymygames( ) {
 		CBlogout();//ensure cookie is unset
 	}
 
-	return $out;
-}
-
-// ============================================================================
-
-function CBdisplayavatar( )
-{
-	$id = CBgetcurrentuserID();
-
-	$image = './users/';
-	if( !file_exists( './users/' .$id .'.png' ) ) {
-		$image .= 'Anonymous';
-	} else {
-		$image .= $id;
-	}
-	$image .= '.png';
-
-	$out = "\n" .'<div class="boxtext"><img style="float : left;margin: 0 1ex 1ex 0;border-style : solid; border-color : black; border-width : 1px" src="' .$image .'">&nbsp;&nbsp;Please, no larger than a 96 x 96 PNG file.</div>
-<div class="boxtext"><form enctype="multipart/form-data" method="post" action="?document=avatar">&nbsp;&nbsp;<input type="file" size="25" name="picture"><br/>&nbsp;&nbsp;<input type="submit" value="Change Avatar"><input type="hidden" name="document" value="avatar"></form></div>
-<div class="clear"></div>';
-
-	return $out;
-}
-
-// ============================================================================
-
-function CBuploadavatar() {
-	$id = CBgetcurrentuserID();
-	$target_path = './users/' . $id . '.png';
-	move_uploaded_file( $_FILES['picture']['tmp_name'], $target_path );
-}
-
-// ============================================================================
-
-function CBdisplaymessage( $id ) {
-	$result = CBfiresql( "SELECT handle,body,posted_on,sender_handle FROM message WHERE id=$id" );
-	$thisrow = pg_Fetch_Object( $result, 0 );
-	$handle = $thisrow->handle;
-	$body = nl2br($thisrow->body);
-	$posted = $thisrow->posted_on;
-	$posted = RMLfixdate( $posted );
-	$sender = $thisrow->sender_handle;
-
-	$out = '';
-	if( hasRights( 'readmsg', array( $handle ) ) ) {
-		$out .= "\n".'<img class="docicon" src="./users/' .CBgetuserID( $sender ) .'.png" />
-From : <b>' .$sender.'</b><br/>Sent : <b>' .$posted.'</b>
-<div class="inlineclear"></div>'
-		.CBdisplay( $body, 5, false )
-		."\n".'<div class="bottom"><a class="button add" href="?message=reply
-		&amp;id=' .$id.'">Reply</a>&nbsp;<a class="button delete" href="?message=delete&amp;id=' .$id.'">Delete</a></div>';
-	} else {
-		$out = "ERROR: Display Message : Cookiii baaaaaadddd...";
-	}
-	return $out;
-}
-
-// ============================================================================
-
-function CBdeletemessage( $id ) {
-	$result = CBfiresql( "SELECT handle FROM message WHERE id=$id" );
-	$thisrow = pg_Fetch_Object( $result, 0 );
-	$handle = $thisrow->handle;
-
-	if( hasRights( 'delmsg', array( $handle ) ) ) {
-		CBfiresql("DELETE FROM message WHERE id=$id");
-	}
-
-	header("Location: ?function=user");
-}
-
-// ============================================================================
-
-function CBreplymessage( $id ) {
-	$user = CBgetcurrentuser();
-	if( ( $user ) && ( $id ) ) {
-		$result = CBfiresql( "SELECT handle,sender_handle,body,subject FROM message WHERE id=$id" );
-		$thisrow = pg_Fetch_Object( $result, 0 );
-		$thishandle = $thisrow->handle;
-		$thissender = $thisrow->sender_handle;
-		$thisbody = htmlspecialchars($thisrow->body);
-		$thissubject = $thisrow->subject;
-		
-		if( $thishandle <> $user ) {
-			$out = "ERROR: Cookie Bad : Not your message??";
-		} else {
-
-			$options = '';
-			$result2 = CBfiresql( "SELECT handle FROM \"user\" ORDER BY handle" );
-			for( $row=0; $row < pg_numrows( $result2 ); $row++ ) {
-				$thisrow = pg_Fetch_Object( $result2, $row );
-				$thisname = $thisrow->handle;
-
-				if( $thisname == $thissender ) {
-					$options .= "\n<option value=\"$thisname\" selected=\"yes\">$thisname</option>";
-				} else if( in_array( $thisname, array( 'admin', 'SYSTEM'/** /, 'Anonymous'/**/ ) ) ) {
-					$options .= "\n<option value=\"$thisname\">$thisname</option>";
-				}
-			}
-
-			$out = "\n<form method=\"post\" action=\"?message=send\">
-<table class=\"form\">
-<tr><td><b>To : </b></td><td><select class=\"norm\" name=\"messageto\">"
-			.$options
-			."</select></td></tr>
-<tr><td valign=\"top\"><b>Subject : </b></td><td><input class=\"norm\" type=\"text\" name=\"messagesubject\" value=\"Re: $thissubject\"></td></tr>
-<tr><td valign=\"top\"><b>Message : </b></td><td><textarea class=\"norm\" rows=\"20\" cols=\"41\" wrap=\"none\" name=\"body\">".$thisbody."</textarea>
-</td></tr><tr><td></td><td><input type=\"submit\" value=\"Send Reply\"></td></tr></table></form>";
-		}
-	}
-	return $out;
-}
-
-// ============================================================================
-
-function CBdisplaynewmessage( ) {
-	$user = CBgetcurrentuser();
-	$out = '';
-	if( hasRights( 'isuser' ) ) {
-		$result = CBfiresql("SELECT handle FROM \"user\" ORDER BY handle");
-
-		if( !isset( $messageto ) || strlen( $messageto ) < 1 ) {
-			$messageto = "Michael Gade";
-		}
-		$options_to = '';
-		for( $row=0; $row < pg_numrows( $result ); $row++ ) {
-			$thisrow = pg_Fetch_Object( $result, $row );
-			$thisname = $thisrow->handle;
-
-			$options_to .= "\n".'<option ';
-			if( $thisname == $messageto ) {
-				$options_to .= 'selected="yes" ';
-			}
-			$options_to .= 'value="'.$thisname.'">'.$thisname.'</option>';
-		}
-		$out .= "\n".'<form method="post" action="?message=send"><table class="form">
-<tr><td><b>To : </b></td><td><select class="norm" name="messageto">'
-				.$options_to
-				."\n".'</select></td></tr>
-<tr><td valign="top"><b>Subject : </b></td><td><input class="norm" type="text" name="messagesubject"></td></tr>
-<tr><td valign="top"><b>Message : </b></td><td><textarea class="norm" rows="20" cols="41" wrap="none" name="body"></textarea>
-</td></tr><tr><td></td><td><input type="submit" value="Send Message"></td></tr></table>
-</form>';
-	} else {
-		$out = 'ERROR: You need to log in to send messages.';
-	}
-	return $out;
-}
-
-// ============================================================================
-
-function CBsendmessage( $to, $msg, $from = 'SYSTEM', $subj = 'Message' ) {
-	$out = '';
-	$r = CBfiresql("INSERT INTO message (id,posted_on,handle,subject,body,sender_handle) VALUES (DEFAULT,NOW(),'$to','$subj','$msg','$from')");
-	if( ! $r ) {
-		$out = 'ERROR: Message not sent: FROM: '.$from.';TO:'.$to.'; SUBJ:'. $subj.'; MSG:'. $msg;
-	}
 	return $out;
 }
 
